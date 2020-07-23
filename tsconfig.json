@@ -9,11 +9,13 @@
     "experimentalDecorators": true,
     "module": "esnext",
     "moduleResolution": "node",
+    "resolveJsonModule": true,
     "importHelpers": true,
     "target": "es2015",
     "lib": [
       "es2018",
-      "dom"
+      "dom",
+      "ES2019.Array"
     ]
   },
   "angularCompilerOptions": {

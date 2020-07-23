@@ -1,0 +1,30 @@
+:host {
+    display: block;
+    width: 260px;
+    background: #222222;
+    color: #fff;
+    border-left: 1px solid rgba(0, 0, 0, .2);
+    padding: 4px;
+
+    .title {
+        font-size: 14px;
+        padding: 16px;
+        border-bottom: 1px solid rgba(0, 0, 0, .2);
+        margin-bottom: 4px;
+    }
+
+    .node {
+        display: block;
+        font-size: 14px;
+        height: 28px;
+        line-height: 28px;
+        padding: 0 16px;
+        cursor: pointer;
+        width: 100%;
+        border-radius: 0;
+        text-align: left;
+
+        &:hover {
+        }
+    }
+}
