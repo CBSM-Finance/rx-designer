@@ -7,10 +7,10 @@ let mainWindow: any;
 const args = process.argv.slice(1);
 const serve = args.some((val) => val === '--serve');
 if (serve) {
-  require('electron-reload')(__dirname, {});
+  // require('electron-reload')(__dirname, {});
 }
 
-handleEvents();
+initAppListeners();
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -19,9 +19,10 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true,
       worldSafeExecuteJavaScript: true,
-      // contextIsolation: true,
     },
   });
+
+  handleEvents();
 
   mainWindow.loadURL(
     url.format({
@@ -38,43 +39,14 @@ function createWindow() {
   });
 }
 
-app.on('ready', createWindow);
+function initAppListeners() {
+  app.on('ready', createWindow);
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
-});
-
-app.on('activate', () => {
-  if (mainWindow === null) createWindow();
-});
-
-export function on(
-  channel: string,
-  command: string,
-  callback: (data: any) => any
-) {
-  return ipcMain.on(channel, async (event, data) => {
-    if (data.command !== command) return;
-    const respondCommand = `${channel}_response`;
-
-    try {
-      await callback(data);
-
-      event.reply(channel, {
-        command: respondCommand,
-        success: true,
-      });
-    } catch (e) {
-      event.reply(channel, {
-        command: respondCommand,
-        success: false,
-        e,
-      });
-    }
+  app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') app.quit();
   });
-}
 
-export function send(channel: string, command: string, payload?: any): void {
-  const msg = { command, payload };
-  mainWindow.webContents.send(channel, msg);
+  app.on('activate', () => {
+    if (mainWindow === null) createWindow();
+  });
 }

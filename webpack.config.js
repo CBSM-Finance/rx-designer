@@ -11,7 +11,12 @@ module.exports = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: "ts-loader",
+        use: {
+          loader: "ts-loader",
+          options: {
+            configFile: "electron/tsconfig.json",
+          },
+        },
         exclude: /node_modules/,
       },
     ],
@@ -19,5 +24,8 @@ module.exports = {
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
   },
-  node: { __dirname: false, __filename: false },
+  node: {
+    __dirname: false,
+    __filename: false,
+  },
 };
