@@ -24,7 +24,7 @@ export function on(
   command: string,
   callback: (data: any) => any
 ) {
-  return ipcMain.on(channel, async (event, data) => {
+  return ipcMain.on(channel, async (event: any, data: any) => {
     if (data.command !== command) return;
     const respondCommand = `${channel}_response`;
 

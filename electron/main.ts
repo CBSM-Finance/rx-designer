@@ -1,14 +1,13 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow } from 'electron';
 import * as url from 'url';
 import * as path from 'path';
 import { handleEvents } from './handle-events';
-
+ 
 let mainWindow: any;
 const args = process.argv.slice(1);
 const serve = args.some((val) => val === '--serve');
-if (serve) {
-  // require('electron-reload')(__dirname, {});
-}
+
+require('electron-reload')(__dirname);
 
 initAppListeners();
 
