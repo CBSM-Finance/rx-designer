@@ -1,16 +1,18 @@
 :host {
     display: block;
     width: 260px;
-    background: #222222;
     color: #fff;
-    border-left: 1px solid rgba(0, 0, 0, .2);
-    padding: 4px;
+    border-right: 1px solid rgba(255, 255, 255, 0.04);
 
     .title {
         font-size: 14px;
-        padding: 16px;
-        border-bottom: 1px solid rgba(0, 0, 0, .2);
+        height: 28px;
+        line-height: 28px;
+        color: #aaa;
+        padding: 0 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
         margin-bottom: 4px;
+        background: linear-gradient(rgba(0,0,0,.1), rgba(0,0,0,.2));
     }
 
     .node {
@@ -20,9 +22,10 @@
         line-height: 28px;
         padding: 0 16px;
         cursor: pointer;
-        width: 100%;
         border-radius: 0;
         text-align: left;
+        margin: 4px;
+        display: block;
 
         &:hover {
         }

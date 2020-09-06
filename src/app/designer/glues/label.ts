@@ -1,7 +1,7 @@
 import { glue } from 'src/app/glue';
-import { Node } from '@cbsm-finance/reactive-nodes';
+import { DesignerNode } from 'src/app/nodes/designer-node';
 
-export function labelGlue(node: Node, colors: any) {
+export function labelGlue(node: DesignerNode, colors: any) {
   const height = 12;
   return glue({
     xPx: 0,

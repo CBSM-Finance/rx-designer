@@ -1,9 +1,21 @@
 import { BaseNode } from '@cbsm-finance/reactive-nodes';
 import { Observable, merge } from 'rxjs';
 import { map, switchMap, scan } from 'rxjs/operators';
+import { State } from '../state';
+import { DesignerNode, DesignerNodeArgType } from './designer-node';
 
-export class MktDataNode extends BaseNode {
-  requiredArgs = 1;
+export class MktDataNode implements DesignerNode {
+  name = 'Market Data';
+  args = [
+    {
+      name: 'Contracts',
+      type: DesignerNodeArgType.ARRAY,
+      required: false,
+      description: 'A list of contracts to get the market data from.',
+      value: [],
+    },
+  ];
+  description = 'Market Data';
 
   operator(source: Observable<any>) {
     return source.pipe(
@@ -21,7 +33,8 @@ export class MktDataNode extends BaseNode {
     );
   }
 
-  constructor(private scope: any) {
-    super('Market Data');
-  }
+  constructor(private scope: any) {}
+  state: any;
+  connect: (state: State) => any;
+  disconnect: () => any;
 }

@@ -4,5 +4,6 @@
         <canvas></canvas>
         <canvas></canvas>
     </div>
+    <app-node-details *ngIf="designer && designer.selectedNode" [node]="designer?.selectedNode"></app-node-details>
 </div>
-<button (click)="run()">run</button>
+<button (click)="run()">run test</button>

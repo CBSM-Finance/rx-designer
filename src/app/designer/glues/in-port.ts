@@ -1,6 +1,7 @@
 import { glue } from 'src/app/glue';
-import { Node, ReactiveGraph } from '@cbsm-finance/reactive-nodes';
+import { ReactiveGraph } from '@cbsm-finance/reactive-nodes';
 import { paintX } from '../paint/x';
+import { DesignerNode } from 'src/app/nodes/designer-node';
 
 export function inPortGlue(
   height: number,
@@ -8,9 +9,9 @@ export function inPortGlue(
   d: number,
   i: number,
   parentHeight: number,
-  node: Node,
+  node: DesignerNode,
   colors: any,
-  graph: ReactiveGraph,
+  graph: ReactiveGraph<DesignerNode>,
 ) {
   return glue({
     wPc: 1,

@@ -3,13 +3,13 @@
   "version": "0.0.0",
   "main": "main.js",
   "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
+    "watch:electron": "webpack --watch --mode production",
+    "watch:angular": "ng build --watch --base-href ./",
+    "serve": "electron ./dist-electron/main.js --serve",
+    "build": "ng build --base-href ./",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e",
-    "start:electron": "ng build --base-href ./ && electron ."
+    "e2e": "ng e2e"
   },
   "private": true,
   "dependencies": {
@@ -24,8 +24,10 @@
     "@angular/platform-browser": "~9.1.11",
     "@angular/platform-browser-dynamic": "~9.1.11",
     "@angular/router": "~9.1.11",
-    "@cbsm-finance/reactive-nodes": "^1.0.4",
+    "@cbsm-finance/ib-connector-ts-client": "^1.0.8",
+    "@cbsm-finance/reactive-nodes": "^1.0.8",
     "mathjs": "^7.1.0",
+    "ngx-electron": "^2.2.0",
     "rxjs": "~6.5.4",
     "tslib": "^1.10.0",
     "zone.js": "~0.10.2"
@@ -34,12 +36,14 @@
     "@angular-devkit/build-angular": "~0.901.10",
     "@angular/cli": "~9.1.10",
     "@angular/compiler-cli": "~9.1.11",
+    "@types/electron": "^1.6.10",
     "@types/jasmine": "~3.5.0",
     "@types/jasminewd2": "~2.0.3",
     "@types/mathjs": "^6.0.5",
-    "@types/node": "^12.11.1",
+    "@types/node": "^12.12.55",
     "codelyzer": "^5.1.2",
-    "electron": "^9.1.0",
+    "electron": "^10.1.1",
+    "electron-reload": "^1.5.0",
     "jasmine-core": "~3.5.0",
     "jasmine-spec-reporter": "~4.2.1",
     "karma": "~5.0.0",
@@ -48,8 +52,10 @@
     "karma-jasmine": "~3.0.1",
     "karma-jasmine-html-reporter": "^1.4.2",
     "protractor": "~7.0.0",
+    "ts-loader": "^8.0.3",
     "ts-node": "~8.3.0",
     "tslint": "~6.1.0",
-    "typescript": "~3.8.3"
+    "typescript": "~3.8.3",
+    "webpack-cli": "^3.3.12"
   }
 }

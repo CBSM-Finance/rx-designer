@@ -1,5 +1,5 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
-import { JSONReaderNode } from '../designer/nodes/json-reader-node';
+import { JSONReaderNode } from '../nodes/json-reader-node';
 
 @Component({
   selector: 'app-node-repository',
@@ -18,5 +18,4 @@ export class NodeRepositoryComponent implements OnInit {
 
   ngOnInit(): void {
   }
-
 }

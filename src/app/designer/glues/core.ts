@@ -1,8 +1,10 @@
 import { glue } from 'src/app/glue';
 import { roundedRect } from '../paint/rounded-rect';
+import { Designer } from '../designer';
+import { DesignerNode } from 'src/app/nodes/designer-node';
 
-export function coreGlue(gridSize: number) {
-  const s = gridSize * 2;
+export function coreGlue(designer: Designer, node: DesignerNode) {
+  const s = designer.gridSize * 2;
   return glue({
     anchor: 'center',
     xPx: -s / 2,
@@ -16,10 +18,9 @@ export function coreGlue(gridSize: number) {
       ctx.strokeStyle = gl.props.hover ? '#aaa' : 'white';
       ctx.lineWidth = 1;
 
-      // ctx.strokeRect(pos.x, pos.y + .5, dim.x, dim.y);
       roundedRect(ctx, pos.x, pos.y + 0.5, dim.x, dim.y, 2);
       ctx.closePath();
-      ctx.fillStyle = '#f2f244';
+      ctx.fillStyle = designer.selectedNode === node ? '#aaa' : '#f2f244';
       ctx.stroke();
       ctx.fill();
     },

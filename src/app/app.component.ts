@@ -1,32 +1,43 @@
-import { Component, ViewChild, ViewChildren, OnInit, AfterViewInit } from '@angular/core';
+import {
+  Component,
+  AfterViewInit,
+} from '@angular/core';
 import { Designer } from './designer/designer';
 import * as json from './conf.json';
-import { ReactiveGraph, NumberNode, Node, StringNode, MeanNode, PrintNode, BaseNode } from '@cbsm-finance/reactive-nodes';
+import { DesignerNode } from './nodes/designer-node';
+import { ElectronCommunicationService } from './electron-communication.service';
+import { ElectronService } from 'ngx-electron';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements AfterViewInit {
-  private designer: Designer;
+  designer: Designer;
 
-  constructor() {
-  }
+  constructor(
+    private ecs: ElectronCommunicationService,
+    es: ElectronService,
+  ) { }
 
   ngAfterViewInit() {
     const canvas = document.querySelectorAll('canvas')[1] as HTMLCanvasElement;
-    const bgCanvas = document.querySelectorAll('canvas')[0] as HTMLCanvasElement;
+    const bgCanvas = document.querySelectorAll(
+      'canvas'
+    )[0] as HTMLCanvasElement;
     canvas.width = bgCanvas.width = canvas.clientWidth;
     canvas.height = bgCanvas.height = canvas.clientHeight;
     this.designer = Designer.fromJson((json as any).default, canvas, bgCanvas);
   }
 
   run() {
-    this.designer.run();
+    this.designer.run({
+      electron: this.ecs,
+    });
   }
 
-  addNode(node: Node) {
+  addNode(node: DesignerNode) {
     this.designer.addNode(node);
   }
 }

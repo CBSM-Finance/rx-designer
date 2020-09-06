@@ -1,49 +1,14 @@
-import {
-  ReactiveGraph,
-  NumberNode,
-  Node,
-  StringNode,
-  MeanNode,
-  PrintNode,
-  BaseNode,
-} from '@cbsm-finance/reactive-nodes';
-import {
-  merge,
-  of,
-  fromEvent,
-  combineLatest,
-  Observable,
-  from,
-  iif,
-  EMPTY,
-  Subject,
-} from 'rxjs';
-import {
-  tap,
-  map,
-  distinctUntilChanged,
-  startWith,
-  mapTo,
-  switchMap,
-  mergeMap,
-  scan,
-  takeUntil,
-} from 'rxjs/operators';
-import {
-  DragHandler,
-  Glue,
-  glue,
-  subtract,
-  MouseEventHandler,
-  add,
-} from '../glue';
+import { ReactiveGraph } from '@cbsm-finance/reactive-nodes';
+import { merge, of, from, Subject, Subscription } from 'rxjs';
+import { tap, takeUntil } from 'rxjs/operators';
+import { DragHandler, Glue, glue, subtract, MouseEventHandler } from '../glue';
 import { objToNode } from './obj-to-node';
-import { roundedRect } from './paint/rounded-rect';
 import { inPortGlue } from './glues/in-port';
-import { paintArrow } from './paint/arrow';
 import { outPortGlue } from './glues/out-port';
 import { coreGlue } from './glues/core';
 import { labelGlue } from './glues/label';
+import { DesignerNode } from '../nodes/designer-node';
+import { State } from '../state';
 
 const colors = {
   bg: '#121218',
@@ -55,7 +20,9 @@ const colors = {
 };
 
 export class Designer {
-  private gridSize = 16;
+  gridSize = 16;
+  selectedNode: DesignerNode = void 0;
+
   private dh: DragHandler;
   private mh: MouseEventHandler;
   private connections: { source: number; target: number; port: number }[];
@@ -82,55 +49,46 @@ export class Designer {
     const obj = typeof json === 'string' ? JSON.parse(json) : json;
     const nodes = obj.nodes.map((o) => objToNode(o, scope));
     const edges = obj.edges;
-    const graph = new ReactiveGraph(nodes, edges);
+    const graph = new ReactiveGraph<DesignerNode>(nodes, edges);
     return new Designer(graph, obj.positions, canvas, bgCanvas);
   }
 
-  addNode(node: Node) {
+  addNode(node: DesignerNode) {
     this.graph.addNode(node);
-    console.log(this.graph.edges, this.graph.nodes);
     this.positions.push([8, 8]);
     this.reload();
   }
 
-  private getConnections(): { source: number; target: number; port: number }[] {
-    const connections: any = [];
-    this.graph.edges.forEach((edges, source) => {
-      edges.forEach((port, target) => {
-        if (port === 0) return;
-        connections.push({
-          source,
-          target,
-          port,
-        });
-      });
+  run(initState: any): Subscription {
+    const state = new State(initState);
+    const { nodes } = this.graph;
+
+    // connect all nodes
+    nodes.forEach(node => node.connect(state));
+
+    const firstNode = nodes[nodes.length - 1];
+    return this.graph.execute(firstNode).subscribe(() => {}, () => {}, () => {
+
+      // disconnect all nodes
+      nodes.forEach(node => node.disconnect());
     });
-    return (this.connections = connections);
   }
 
-  private drawGrid(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
-    const w = canvas.width;
-    const h = canvas.height;
+  constructor(
+    private graph: ReactiveGraph<DesignerNode>,
+    private positions: number[][],
+    private canvas: HTMLCanvasElement,
+    private bgCanvas: HTMLCanvasElement
+  ) {
+    bgCanvas.style.backgroundColor = colors.bg;
+    this.drawGrid(bgCanvas.getContext('2d'), bgCanvas);
 
-    for (let y = 0; y < h; y += this.gridSize) {
-      for (let x = 0; x < w; x += this.gridSize) {
-        ctx.beginPath();
-        ctx.fillStyle = colors.grid;
-        ctx.arc(x, y, 1, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.closePath();
-      }
-    }
-  }
-
-  run() {
-    const node = this.graph.nodes[this.graph.nodes.length - 1];
-    return this.graph.execute(node);
+    this.reload();
   }
 
   private reload() {
     this.reset();
-    
+
     this.glNodes = this.graph.nodes.map((node, i) =>
       this.addItem(this.positions[i][0], this.positions[i][1], node)
     );
@@ -153,10 +111,8 @@ export class Designer {
             onMove: (ev: MouseEvent) => {
               const rect = this.canvas.getBoundingClientRect();
               return (port.props.hover =
-                port.intersect(
-                  ev.pageX - rect.x,
-                  ev.pageY - rect.y
-                ).length > 0);
+                port.intersect(ev.pageX - rect.x, ev.pageY - rect.y).length >
+                0);
             },
           });
         });
@@ -186,6 +142,10 @@ export class Designer {
         });
       });
 
+      this.mh.register(gl.query('core')[0], {
+        onClick: () => (this.selectedNode = this.graph.nodes[i]),
+      });
+
       gl.query('out-port').forEach((port) => {
         this.dh.register(port, {
           setRef: (dg) => dg.path[0],
@@ -203,10 +163,8 @@ export class Designer {
                 .query('in-port')
                 .findIndex(
                   (p) =>
-                    p.intersect(
-                      event.pageX - rect.x,
-                      event.pageY - rect.y
-                    ).length > 0
+                    p.intersect(event.pageX - rect.x, event.pageY - rect.y)
+                      .length > 0
                 );
               if (portI === -1) return false;
               const target = this.graph.nodes[h];
@@ -329,19 +287,37 @@ export class Designer {
     this.glNodes.forEach((g) => g.paint(this.canvas));
   }
 
-  constructor(
-    private graph: ReactiveGraph,
-    private positions: number[][],
-    private canvas: HTMLCanvasElement,
-    private bgCanvas: HTMLCanvasElement
-  ) {
-    bgCanvas.style.backgroundColor = colors.bg;
-    this.drawGrid(bgCanvas.getContext('2d'), bgCanvas);
-
-    this.reload();
+  private getConnections(): { source: number; target: number; port: number }[] {
+    const connections: any = [];
+    this.graph.edges.forEach((edges, source) => {
+      edges.forEach((port, target) => {
+        if (port === 0) return;
+        connections.push({
+          source,
+          target,
+          port,
+        });
+      });
+    });
+    return (this.connections = connections);
   }
 
-  private addItem(x: number, y: number, node: Node): Glue {
+  private drawGrid(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
+    const w = canvas.width;
+    const h = canvas.height;
+
+    for (let y = 0; y < h; y += this.gridSize) {
+      for (let x = 0; x < w; x += this.gridSize) {
+        ctx.beginPath();
+        ctx.fillStyle = colors.grid;
+        ctx.arc(x, y, 1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.closePath();
+      }
+    }
+  }
+
+  private addItem(x: number, y: number, node: DesignerNode): Glue {
     const gl = glue(
       {
         wPx: this.gridSize * 4,
@@ -352,8 +328,8 @@ export class Designer {
         color: 'transparent',
       },
       [
-        this.getInPorts(node.requiredArgs, node),
-        this.getCore(),
+        this.getInPorts(node.args.length, node),
+        coreGlue(this, node),
         this.getOutPorts(1, node),
         this.getLabel(node),
       ]
@@ -361,15 +337,11 @@ export class Designer {
     return gl;
   }
 
-  private getLabel(node: Node): Glue {
+  private getLabel(node: DesignerNode): Glue {
     return labelGlue(node, colors);
   }
 
-  private getCore(): Glue {
-    return coreGlue(this.gridSize);
-  }
-
-  private getOutPorts(count: number, node: Node) {
+  private getOutPorts(count: number, node: DesignerNode) {
     const items = [];
     const height = 10;
     const d = height + 4;
@@ -391,7 +363,7 @@ export class Designer {
     );
   }
 
-  private getInPorts(count: number, node: Node) {
+  private getInPorts(count: number, node: DesignerNode) {
     const items = [];
     const height = 10;
     const d = height + 4;
@@ -411,10 +383,6 @@ export class Designer {
       items
     );
   }
-}
-
-export interface State {
-  mktData: { [symbol: string]: MktData };
 }
 
 export interface MktData {
