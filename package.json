@@ -23,7 +23,6 @@
     "@angular/material": "^9.2.4",
     "@angular/platform-browser": "~9.1.11",
     "@angular/platform-browser-dynamic": "~9.1.11",
-    "@angular/router": "~9.1.11",
     "@cbsm-finance/ib-connector-ts-client": "^1.0.8",
     "@cbsm-finance/reactive-nodes": "^1.0.8",
     "mathjs": "^7.1.0",
