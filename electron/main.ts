@@ -2,26 +2,29 @@ import { app, BrowserWindow } from 'electron';
 import * as url from 'url';
 import * as path from 'path';
 import { handleEvents } from './handle-events';
- 
+
 let mainWindow: any;
-const args = process.argv.slice(1);
-const serve = args.some((val) => val === '--serve');
+
+// const args = process.argv.slice(1);
+// const serve = args.some((val) => val === '--serve');
 
 require('electron-reload')(__dirname);
-
 initAppListeners();
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1600,
+    height: 1200,
+    frame: false,
     webPreferences: {
       nodeIntegration: true,
       worldSafeExecuteJavaScript: true,
     },
   });
 
-  handleEvents();
+  mainWindow.webContents.on('did-finish-load', () => {
+    handleEvents(mainWindow);
+  });
 
   mainWindow.loadURL(
     url.format({

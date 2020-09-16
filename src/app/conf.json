@@ -1,14 +1,59 @@
 {
-    "name": "Mean Calculator",
-    "nodes": [
-        {
-            "type": "launchIb"
-        }
-    ],
-    "edges": [
-        [0]
-    ],
-    "positions": [
-        [1, 1]
-    ]
+  "name": "Print Text Test",
+  "nodes": [{
+    "type": "system.text",
+    "inputs": [{
+      "name": "Text",
+      "value": "Lorem",
+      "type": "Text"
+    }]
+  }, {
+    "type": "system.text",
+    "inputs": [{
+      "name": "Text",
+      "value": "Ipsum",
+      "type": "Text"
+    }]
+  }, {
+    "type": "system.merge",
+    "inputs": [{
+      "name": "First"
+    }, {
+      "name": "Second"
+    }]
+  }, {
+    "type": "system.print",
+    "inputs": [{
+      "name": "Text",
+      "type": "Text"
+    }]
+  }, {
+    "type": "system.connector",
+    "inputs": [{
+      "name": "First"
+    },
+    {
+      "name": "Second"
+    },
+    {
+      "name": "Third"
+    },
+    {
+      "name": "Fourth"
+    }]
+  }],
+  "edges": [
+    [0, 0, [[0, 0]], 0, 0],
+    [0, 0, [[0, 1]], 0, 0],
+    [0, 0, 0, [[0, 0]], 0],
+    [0, 0, 0, 0, [[0, 0]]],
+    [0, 0, 0, 0, 0]
+  ],
+  "positions": [
+    [1, 1],
+    [1, 3],
+    [3, 2],
+    [5, 2],
+    [7, 2]
+  ]
 }

@@ -1,42 +1,38 @@
 :host {
-    display: block;
-    width: 260px;
-    border-left: 1px solid rgba(255, 255, 255, 0.04);
-    position: absolute;
-    right: 0;
-    top: 0;
-    height: 100%;
-    background: #121218;
+  display: block;
+  width: 320px;
+  color: #fff;
+  background: rgba(180, 220, 255, .1);
+  border-left: 1px solid rgba(255, 255, 255, .1);
 
-    .content {
-        padding: 0 16px;
-    }
+  .content {
+    padding: 0 16px;
+  }
 
-    .title {
-        font-size: 14px;
-        height: 28px;
-        line-height: 28px;
-        color: #aaa;
-        padding: 0 16px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-        margin-bottom: 4px;
-        background: linear-gradient(rgba(0,0,0,.1), rgba(0,0,0,.2));
-    }
+  .title {
+    font-size: 16px;
+    color: #fff;
+    height: 28px;
+    font-weight: 500;
+    line-height: 28px;
+    padding: 0 16px;
+    margin: 16px 0;
+  }
 
-    .sub-title {
-        font-size: 14px;
-        height: 28px;
-        line-height: 28px;
-        color: #aaa;
-        margin: 0 16px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-        margin-bottom: 4px;
-    }
+  .sub-title {
+    font-size: 14px;
+    color: #aaa;
+    height: 28px;
+    line-height: 28px;
+    padding: 0 16px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
 
-    .description {
-        color: #fff;
-        padding: 16px;
-        font-size: 12px;
-        line-height: 22px;
-    }
+  .description {
+    color: #fff;
+    padding: 16px;
+    font-size: 12px;
+    line-height: 22px;
+  }
 }

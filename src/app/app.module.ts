@@ -6,10 +6,15 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { NodeRepositoryModule } from './node-repository/node-repository.module';
 import { NodeDetailsModule } from './node-details/node-details.module';
 import { NgxElectronModule } from 'ngx-electron';
+import { HeaderComponent } from './header/header.component';
+import { MatIconModule } from '@angular/material/icon';
+import { LogsComponent } from './logs/logs.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    HeaderComponent,
+    LogsComponent,
   ],
   imports: [
     BrowserModule,
@@ -18,6 +23,7 @@ import { NgxElectronModule } from 'ngx-electron';
     NodeRepositoryModule,
     NodeDetailsModule,
     NgxElectronModule,
+    MatIconModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

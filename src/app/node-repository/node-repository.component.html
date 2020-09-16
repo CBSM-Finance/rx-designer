@@ -1,6 +1,7 @@
 <div class="title">Node Repository</div>
-<button mat-button class="node" *ngFor="let node of nodes"
-    (click)="instantiate.emit(node.generate())">
-    {{node.name}}
-    <mat-icon>keyboard_arrow_right</mat-icon>
-</button>
+<div class="group" *ngFor="let group of nodeGroups">
+  <div class="group-title">{{group.title}}</div>
+  <div class="node" *ngFor="let node of group.nodes" (click)="addNode(node)">
+    {{node.TITLE}}
+  </div>
+</div>

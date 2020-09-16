@@ -1,0 +1,46 @@
+$height: 30px;
+
+:host {
+  display: flex;
+  height: $height;
+  line-height: $height;
+  border-bottom: 1px solid rgba(255, 255, 255, .1);
+  box-sizing: border-box;
+  padding: 0;
+  flex-direction: row;
+  background-color: rgba(255, 255, 255, .14);
+  -webkit-app-region: drag;
+  align-items: center;
+
+  .actions {
+    .btn {
+      margin-left: 8px;
+    }
+  }
+
+  .logo {
+    display: block;
+    padding: 0 16px;
+  }
+
+  .btn {
+    -webkit-app-region: no-drag;
+    user-select: none;
+
+    mat-icon {
+      cursor: default;
+      line-height: $height;
+      height: $height;
+      width: $height;
+      text-align: center;
+      vertical-align: top;
+      color: rgba(255, 255, 255, .9);
+      font-size: 12pt;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, .1);
+      }
+    }
+  }
+
+}

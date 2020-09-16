@@ -1,32 +1,66 @@
 import { tap } from 'rxjs/operators';
 import { IBConnectorClient } from '@cbsm-finance/ib-connector-ts-client';
-import { BrowserWindow, ipcMain } from 'electron';
+import { ipcMain } from 'electron';
+import { log } from './log';
+import { IBConnectorType } from '@cbsm-finance/ib-connector-ts-client/dist/types/ib-connector-type';
+import { SubSink } from 'subsink';
 
-declare const mainWindow: BrowserWindow;
+const subs = new SubSink();
+const client = new IBConnectorClient('./');
 
-export function handleEvents() {
-  const client = new IBConnectorClient('./');
+export function handleEvents(mainWindow: any) {
+
+  ipcMain.removeAllListeners();
+  subs.unsubscribe();
+  client.kill();
+
+  const localCommands = ['launch'];
+
+  on('ib', cmd => !localCommands.includes(cmd), data => client.send({
+    type: data.command,
+    ...data.payload,
+  }));
 
   on('ib', 'launch', async () => {
     client.launch();
     send('ib', 'launched');
-  });
 
-  on('ib', 'observe messages', async () => {
-    client.inMessages
+    subs.sink = client.inMessages
       .pipe(tap((msg) => send('ib', 'message', msg)))
       .subscribe();
+
+    subs.sink = client.errors
+      .pipe(tap((err) => send('ib', 'message', {
+        type: 'iberror',
+        msg: err,
+      })))
+      .subscribe();
   });
+
+  // on('ib', 'connect tws', async () => {
+  //   client.send<IBConnect>({
+  //     type: 'connect',
+  //     port: 4200,
+  //     host: '127.0.0.1',
+  //     clientId: 1,
+  //   });
+  // });
+
+  function send(channel: string, command: string, payload?: any): void {
+    log.notify(`send [${channel}]`, { command, payload });
+    const msg = { command, payload };
+    mainWindow.webContents.send(channel, msg);
+  }
 }
 
 export function on(
   channel: string,
-  command: string,
+  command: string | ((cmd: string) => boolean),
   callback: (data: any) => any
 ) {
   return ipcMain.on(channel, async (event: any, data: any) => {
-    if (data.command !== command) return;
-    const respondCommand = `${channel}_response`;
+    if (!isCommand(command, data.command)) return;
+    const respondCommand = `${command}_response`;
 
     try {
       await callback(data);
@@ -45,7 +79,13 @@ export function on(
   });
 }
 
-export function send(channel: string, command: string, payload?: any): void {
-  const msg = { command, payload };
-  mainWindow.webContents.send(channel, msg);
+export interface IBConnect extends IBConnectorType {
+  port: number;
+  host: string;
+  clientId: number;
+}
+
+export function isCommand(command: string | ((c: string) => boolean), cmd: string): boolean {
+  if (typeof command === 'string') return command === cmd;
+  return command(cmd);
 }

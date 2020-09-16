@@ -5,9 +5,9 @@
 // import { ElectronCommunicationService } from 'src/app/electron-communication.service';
 // import { LoggerService } from 'src/app/logger.service';
 
-// export class LaunchIBNode extends DesignerNode {
-//   static TITLE = 'Launch IB';
-//   static LOCAL_ID = 'launch';
+// export class RequestMktDataNode extends DesignerNode {
+//   static TITLE = 'Request Mkt Data';
+//   static LOCAL_ID = 'reqMktData';
 
 //   state: State;
 //   args: DesignerNodeArg[] = [
@@ -26,6 +26,17 @@
 //   operator() {
 //     const electron = this.state.get('electron') as ElectronCommunicationService;
 //     const logger = this.state.get('logger') as LoggerService;
+
+//     const contract = {
+//       // multiplier;
+//       // localSymbol;
+//       exchange: 'ISLAND',
+//       // primaryExch: '',
+//       symbol: 'IBKR',
+//       secType: 'STK',
+//       currency: 'USD',
+//     };
+
 //     return of(true).pipe(
 //       tap(() => electron.send('ib', 'launch')),
 //       switchMapTo(electron.on('ib', 'launched')),
@@ -43,41 +54,4 @@
 //   }
 
 //   disconnect() { }
-// }
-
-// export class TransmitOrderNode {
-//   static TITLE = 'Transmit Order';
-//   static LOCAL_ID = 'transmitOrder';
-
-//   inputs = [
-//     {
-//       name: 'Contract',
-//       type: 'CONTRACT',
-//     },
-//     {
-//       name: 'Quantity',
-//       type: 'Number',
-//     },
-//   ];
-
-//   outputs = [
-//     {
-//       name: 'Transmit',
-//       type: 'CONTRACT',
-//     },
-//     {
-//       name: 'Order Status',
-//       type: 'ORDER_STATUS',
-//     }
-//   ];
-
-//   connect(inputs: Observable<any>) {
-//     const traded = combineLatest(inputs).pipe(
-//       tap(() => { }), // trade contracts
-//     );
-//     return [
-//       traded.pipe(), // on transmit
-//       traded.pipe(), // order status
-//     ];
-//   }
 // }

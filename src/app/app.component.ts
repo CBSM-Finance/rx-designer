@@ -6,7 +6,10 @@ import { Designer } from './designer/designer';
 import * as json from './conf.json';
 import { DesignerNode } from './nodes/designer-node';
 import { ElectronCommunicationService } from './electron-communication.service';
-import { ElectronService } from 'ngx-electron';
+import { tap } from 'rxjs/operators';
+import { EMPTY, Subscription } from 'rxjs';
+import { LoggerService } from './logger.service';
+import { subtract } from './glue';
 
 @Component({
   selector: 'app-root',
@@ -16,9 +19,11 @@ import { ElectronService } from 'ngx-electron';
 export class AppComponent implements AfterViewInit {
   designer: Designer;
 
+  private sub: Subscription;
+
   constructor(
     private ecs: ElectronCommunicationService,
-    es: ElectronService,
+    private logger: LoggerService,
   ) { }
 
   ngAfterViewInit() {
@@ -32,8 +37,10 @@ export class AppComponent implements AfterViewInit {
   }
 
   run() {
-    this.designer.run({
+    if (this.sub) this.sub.unsubscribe();
+    this.sub = this.designer.run({
       electron: this.ecs,
+      logger: this.logger,
     });
   }
 

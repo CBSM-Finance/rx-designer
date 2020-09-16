@@ -7,18 +7,19 @@ import { Observable } from 'rxjs';
 })
 export class ElectronCommunicationService {
   send(channel: string, command: string, payload?: any) {
+    console.log(`send [${channel}]`, { command, payload });
     const data = {
       command,
       payload,
     };
-    this.es.ipcRenderer.send(channel, data);
+    setTimeout(() => this.es.ipcRenderer.send(channel, data), 0);
   }
 
   on(channel: string, command: string): Observable<any> {
     return new Observable(observer => {
-      const listener =  (_: any, data: any) => {
+      const listener = (_: any, data: any) => {
         if (data.command !== command) return;
-        observer.next(data);
+        observer.next(data.payload);
       };
       this.es.ipcRenderer.on(channel, listener);
       return () => this.es.ipcRenderer.removeListener(channel, listener);

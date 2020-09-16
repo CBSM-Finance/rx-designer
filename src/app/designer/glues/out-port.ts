@@ -21,7 +21,7 @@ export function outPortGlue(
     customPaint: (gl, ctx) => {
       const { pos, dim } = gl.cache;
       paintArrow(ctx, pos, dim);
-      const conn = graph.outgoingNodes(node).length > 0;
+      const conn = graph.outgoingNodes(node, i).length > 0;
 
       if (conn) {
         ctx.strokeStyle = colors.connections;

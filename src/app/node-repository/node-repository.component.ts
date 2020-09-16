@@ -1,5 +1,5 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
-import { JSONReaderNode } from '../nodes/json-reader-node';
+import { nodeGroups } from '../nodes/node-groups';
 
 @Component({
   selector: 'app-node-repository',
@@ -9,13 +9,14 @@ import { JSONReaderNode } from '../nodes/json-reader-node';
 export class NodeRepositoryComponent implements OnInit {
   @Output() instantiate = new EventEmitter<any>();
 
-  nodes = [
-    { name: 'JSON Reader', generate: () => new JSONReaderNode(), },
-    { name: 'test', generate: () => new JSONReaderNode(), },
-  ];
+  nodeGroups = nodeGroups;
 
   constructor() { }
 
   ngOnInit(): void {
+  }
+
+  addNode(node: any) {
+    this.instantiate.emit(new node());
   }
 }

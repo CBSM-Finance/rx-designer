@@ -1,33 +1,46 @@
 :host {
-    display: block;
-    width: 260px;
-    color: #fff;
-    border-right: 1px solid rgba(255, 255, 255, 0.04);
+  display: block;
+  width: 320px;
+  color: #fff;
+  background: rgba(180, 220, 255, .1);
+  border-right: 1px solid rgba(255, 255, 255, .1);
 
-    .title {
-        font-size: 14px;
-        height: 28px;
-        line-height: 28px;
-        color: #aaa;
-        padding: 0 16px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-        margin-bottom: 4px;
-        background: linear-gradient(rgba(0,0,0,.1), rgba(0,0,0,.2));
+  .title {
+    font-size: 16px;
+    color: #fff;
+    height: 28px;
+    font-weight: 500;
+    line-height: 28px;
+    padding: 0 16px;
+    margin: 16px 0;
+  }
+
+  .group {
+      margin-bottom: 16px;
+
+    .group-title {
+      font-size: 14px;
+      color: #aaa;
+      height: 28px;
+      line-height: 28px;
+      padding: 0 16px;
+      margin-bottom: 4px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .node {
-        display: block;
-        font-size: 14px;
-        height: 28px;
-        line-height: 28px;
-        padding: 0 16px;
-        cursor: pointer;
-        border-radius: 0;
-        text-align: left;
-        margin: 4px;
-        display: block;
+      display: block;
+      font-size: 14px;
+      height: 28px;
+      line-height: 28px;
+      padding: 0 16px;
+      cursor: pointer;
+      border-radius: 0;
+      text-align: left;
+      margin: 4px;
+      display: block;
 
-        &:hover {
-        }
+      &:hover {}
     }
+  }
 }

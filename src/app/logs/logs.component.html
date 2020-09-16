@@ -1,0 +1,9 @@
+<header>
+  Logs
+</header>
+<div class="scroll-container">
+  <div [ngClass]="log.level" fxLayout="row" class="log" *ngFor="let log of logs | async; trackBy: trackByFn">
+    <div class="node">{{log.node}}</div>
+    <div fxFlex class="msg">{{log.msg | json}}</div>
+  </div>
+</div>

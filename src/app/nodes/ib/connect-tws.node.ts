@@ -1,39 +1,68 @@
-import { of } from 'rxjs';
-import { State } from 'src/app/state';
-import { DesignerNode, DesignerNodeArg, DesignerNodeArgType } from '../designer-node';
-const electron = (window as any).require('electron');
+// import { Observable, of } from 'rxjs';
+// import { filter, mapTo, switchMapTo, tap } from 'rxjs/operators';
+// import { ElectronCommunicationService } from 'src/app/electron-communication.service';
+// import { DesignerNode, DesignerNodeArg, DesignerNodeArgType } from '../designer-node';
+// import { LoggerService } from '../../logger.service';
 
-export class ConnectTWSNode implements DesignerNode {
-  state: any;
-  name = 'Connect to TWS';
-  args: DesignerNodeArg[] = [
-    {
-      name: 'URL',
-      type: DesignerNodeArgType.STRING,
-      required: false,
-      description: 'The JSON file path.',
-    }
-  ];
+// export class ConnectTWSNode2 extends DesignerNode {
+//   static TITLE = 'Connect to TWS';
+//   static LOCAL_ID = 'twsConnect';
 
-  description = `
-    Emits whenever TWS is connected.
-  `;
+//   args: DesignerNodeArg[] = [
+//     {
+//       name: 'URL',
+//       type: DesignerNodeArgType.STRING,
+//       required: false,
+//       description: 'The JSON file path.',
+//     }
+//   ];
 
-  operator() {
-    console.log('connect TWS', this.args[0].value);
-    return of({
-      contracts: [{ symbol: 'UVXY' }, { symbol: 'DTO' }, { symbol: 'TVIX' }],
-    });
-  }
+//   description = `
+//     CONNECT
+//   `;
 
-  constructor() { }
+//   operator(source: Observable<any>) {
+//     const electron = this.state.get('electron') as ElectronCommunicationService;
+//     const logger = this.state.get('logger') as LoggerService;
+//     return source.pipe(
+//       tap(() => electron.send('ib', 'connect', {
+//         port: 4001,
+//         host: '127.0.0.1',
+//         clientId: 1,
+//       })),
+//       switchMapTo(electron.on('ib', 'message')),
+//       filter(msg => msg.type === 'connection'),
+//       filter(({ connected }) => connected as boolean),
+//       mapTo('Connected to TWS'),
+//       logger.log(msg => ({
+//         level: 'info',
+//         node: this.title,
+//         msg,
+//       })),
+//     );
+//   }
+// }
 
-  connect(state: State) {
-    this.state = state;
-    electron.ipcRenderer.sendSync('synchronous-message', 'ping');
-  }
+// export class ConnectTWSNode {
+//   static TITLE = 'Connect to TWS';
+//   static LOCAL_ID = 'twsConnect';
 
-  disconnect() {
+//   inputs = [];
 
-  }
-}
+//   outputs = [
+//     {
+//       name: 'Connected',
+//       type: 'BOOL',
+//     },
+//   ];
+
+//   connect(inputs: Observable<any>) {
+//     const traded = combineLatest(inputs).pipe(
+//       tap(() => { }), // trade contracts
+//     );
+//     return [
+//       traded.pipe(), // on transmit
+//       traded.pipe(), // order status
+//     ];
+//   }
+// }

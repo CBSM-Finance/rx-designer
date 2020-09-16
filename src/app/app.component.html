@@ -1,10 +1,13 @@
-<div fxLayout="row" fxFlex>
+<div fxLayout="column" fxFlex>
+  <app-header></app-header>
+  <div fxLayout="row" fxFlex>
     <app-node-repository (instantiate)="addNode($event)"></app-node-repository>
     <div class="designer">
-        <canvas></canvas>
-        <canvas></canvas>
+      <canvas></canvas>
+      <canvas></canvas>
     </div>
     <app-node-details *ngIf="designer && designer.selectedNode" [node]="designer?.selectedNode"></app-node-details>
+  </div>
+  <app-logs></app-logs>
 </div>
 <button (click)="run()">run</button>
- 

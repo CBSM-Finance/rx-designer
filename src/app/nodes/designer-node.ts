@@ -2,30 +2,60 @@ import { Observable } from 'rxjs';
 import { BaseNode } from '@cbsm-finance/reactive-nodes';
 import { State } from '../state';
 
-export interface DesignerNode extends BaseNode {
+export abstract class DesignerNode implements BaseNode {
+
+  /**
+   * Large title for UI.
+   */
+  static TITLE = 'My Title';
+  get title() {
+    return (this.constructor as typeof DesignerNode).TITLE;
+  }
+
+  /**
+   * Node id, unique to the node group.
+   */
+  static LOCAL_ID = 'myNode';
+  get localId() {
+    return (this.constructor as typeof DesignerNode).LOCAL_ID;
+  }
+
+  inputCount() {
+    return this.inputs.length;
+  }
+
   state: any;
-  name: string;
-  args: DesignerNodeArg[];
+  inputs: DesignerNodeInput[];
+  outputs: DesignerNodeOutput[];
   description: string;
 
   /**
    * Called when graph is executed.
    */
-  connect: (state: State) => any;
+  initialize(state: State) {
+    this.state = state;
+  }
 
   /**
    * Called when graph execution is done.
    */
-  disconnect: () => any;
+  kill() {}
+
+  connect(inputs: Observable<any>[]): Observable<any>[] {
+    return inputs;
+  }
 }
 
-export interface DesignerNodeArg {
+export class DesignerNodeInput {
   name: string;
-  type: DesignerNodeArgType;
-  description?: string;
-  lastValue?: any;
-  required?: boolean;
   value?: any;
+  type?: string;
+  expose?: boolean;
+}
+
+export class DesignerNodeOutput {
+  name: string;
+  type?: string;
 }
 
 export enum DesignerNodeArgType {

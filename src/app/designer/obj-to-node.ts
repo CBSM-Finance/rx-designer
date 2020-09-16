@@ -1,28 +1,27 @@
 import { DesignerNode } from '../nodes/designer-node';
-import { EmptyNode } from '../nodes/empty-node';
-import { LaunchIBNode } from '../nodes/ib/launch-ib.node';
-import { JSONReaderNode } from '../nodes/json-reader-node';
-import { MktDataNode } from '../nodes/mkt-data-node';
+import { nodeGroups } from '../nodes/node-groups';
 
-export function objToNode(obj: any, scope: any): DesignerNode {
-  const args = obj.options || [];
-  switch (obj.type) {
-    case 'empty':
-      return new EmptyNode();
-    case 'launchIb':
-      return new LaunchIBNode();
-    // case 'number':
-    //   return new NumberNode(...args);
-    // case 'string':
-    //   return new StringNode(...args);
-    // case 'mean':
-    //   return new MeanNode();
-    // case 'print':
-    //   return new PrintNode();
-    case 'mktData':
-      return new MktDataNode(scope);
-    case 'jsonReader':
-      return new JSONReaderNode();
-  }
-  throw new Error(`Type '${obj.type}' could not be found.`);
+export function objToNode(obj: any): DesignerNode {
+  const [groupId, nodeId] = obj.type.split('.');
+  const group = nodeGroups.find(g => g.id === groupId);
+
+  if (!group) throw new Error(`Group '${groupId}' could not be found.`);
+
+  const node = group.nodes.find(n => n.LOCAL_ID === nodeId) as any;
+  if (!node) throw new Error(`Node '${nodeId}' in group '${groupId}' could not be found.`);
+
+  // add params...... 88888888888888888888
+
+  return new node();
 }
+
+// abstract class Person {
+//   name: string;
+// }
+
+// class Employee extends Person {
+// }
+
+// const persons: typeof Person[] = [Employee];
+
+// const dan = new persons[0](); // Cannot create an instance of an abstract class.

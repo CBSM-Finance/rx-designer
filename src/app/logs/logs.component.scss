@@ -1,0 +1,53 @@
+:host {
+  display: grid;
+  background: rgba(180, 220, 255, .1);
+  border-top: 1px solid rgba(255, 255, 255, .1);
+  color: #fff;
+  height: 280px;
+  width: 100%;
+  box-sizing: border-box;
+  grid-template-rows: 29px auto;
+
+  header {
+    height: 28px;
+    border-bottom: 1px solid rgba(255, 255, 255, .1);
+    padding: 0 16px;
+    line-height: 28px;
+  }
+
+  .scroll-container {
+    overflow: auto;
+
+    .log {
+      display: block;
+      line-height: 28px;
+      color: #aaa;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0 16px;
+
+      &.error {
+        color: red;
+      }
+
+      >div {
+        display: inline-block;
+        vertical-align: top;
+      }
+
+      .node {
+        width: 120px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding-right: 16px;
+      }
+
+      .msg {}
+    }
+
+
+  }
+}

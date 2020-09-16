@@ -1,18 +1,16 @@
-import { of } from 'rxjs';
-import { State } from '../state';
-import { DesignerNode } from './designer-node';
+// import { of } from 'rxjs';
+// import { State } from '../state';
+// import { DesignerNode } from './designer-node';
 
-export class EmptyNode implements DesignerNode {
-  name = 'Empty';
-  args = [];
-  description = 'empty';
+// export class EmptyNode extends DesignerNode {
+//   static TITLE = 'Empty';
+//   static LOCAL_ID = 'empty';
 
-  operator() {
-    return of({});
-  }
+//   args = [];
+//   description = 'empty';
 
-  constructor() {}
-  state: any;
-  connect: (state: State) => any;
-  disconnect: () => any;
-}
+//   operator() {
+//     return of({});
+//   }
+
+// }

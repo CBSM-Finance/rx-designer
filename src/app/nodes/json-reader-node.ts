@@ -1,36 +1,30 @@
-import { of } from 'rxjs';
-import { BaseNode } from '@cbsm-finance/reactive-nodes';
-import {
-  DesignerNode,
-  DesignerNodeArgType,
-  DesignerNodeArg,
-} from './designer-node';
-import { State } from '../state';
+// import { of } from 'rxjs';
+// import {
+//   DesignerNode,
+//   DesignerNodeArgType,
+// } from './designer-node';
 
-export class JSONReaderNode implements DesignerNode {
-  name = 'JSON Reader';
-  args: DesignerNodeArg[] = [
-    {
-      name: 'URL',
-      type: DesignerNodeArgType.STRING,
-      required: false,
-      description: 'The JSON file path.',
-    },
-  ];
+// export class JSONReaderNode extends DesignerNode {
+//   static TITLE = 'JSON Reader';
+//   static LOCAL_ID = 'jsonReader';
 
-  description = `
-    Read a JSON file relative to the application root folder.
-  `;
+//   args: DesignerNodeArg[] = [
+//     {
+//       name: 'URL',
+//       type: DesignerNodeArgType.STRING,
+//       required: false,
+//       description: 'The JSON file path.',
+//     },
+//   ];
 
-  operator() {
-    console.log('reading json file', this.args[0].value);
-    return of({
-      contracts: [{ symbol: 'UVXY' }, { symbol: 'DTO' }, { symbol: 'TVIX' }],
-    });
-  }
+//   description = `
+//     Read a JSON file relative to the application root folder.
+//   `;
 
-  constructor() {}
-  state: any;
-  connect: (state: State) => any;
-  disconnect: () => any;
-}
+//   operator() {
+//     console.log('reading json file', this.args[0].value);
+//     return of({
+//       contracts: [{ symbol: 'UVXY' }, { symbol: 'DTO' }, { symbol: 'TVIX' }],
+//     });
+//   }
+// }

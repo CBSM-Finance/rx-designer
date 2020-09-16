@@ -1,6 +1,6 @@
 import { ReactiveGraph } from '@cbsm-finance/reactive-nodes';
-import { merge, of, from, Subject, Subscription } from 'rxjs';
-import { tap, takeUntil } from 'rxjs/operators';
+import { merge, of, from, Subject, Subscription, fromEvent, Observable, EMPTY } from 'rxjs';
+import { tap, takeUntil, switchMapTo, share } from 'rxjs/operators';
 import { DragHandler, Glue, glue, subtract, MouseEventHandler } from '../glue';
 import { objToNode } from './obj-to-node';
 import { inPortGlue } from './glues/in-port';
@@ -9,6 +9,7 @@ import { coreGlue } from './glues/core';
 import { labelGlue } from './glues/label';
 import { DesignerNode } from '../nodes/designer-node';
 import { State } from '../state';
+import { NodeBuilder } from '@cbsm-finance/reactive-nodes/dist/reactive-graph';
 
 const colors = {
   bg: '#121218',
@@ -19,13 +20,31 @@ const colors = {
   dragConnection: '#aaa',
 };
 
+/**
+ * Custom node builder that resolves fallback values.
+ */
+export const rxDesignerNodeBuilder: NodeBuilder = (node: DesignerNode, inputs) => {
+  const resolvedInputs = inputs.map((input, i) => {
+    if (input !== EMPTY) return input;
+    const fallbackVal = node.inputs[i].value;
+    if (fallbackVal === void 0) return EMPTY;
+    return of(fallbackVal);
+  });
+  return node.connect(resolvedInputs) as Observable<any>[];
+};
+
 export class Designer {
   gridSize = 16;
   selectedNode: DesignerNode = void 0;
 
   private dh: DragHandler;
   private mh: MouseEventHandler;
-  private connections: { source: number; target: number; port: number }[];
+  private connections: {
+    source: number;
+    target: number;
+    inPort: number;
+    outPort: number;
+  }[];
   private glNodes: Glue[];
   private dragConnection = void 0;
   private unsub = new Subject<void>();
@@ -47,9 +66,11 @@ export class Designer {
     };
 
     const obj = typeof json === 'string' ? JSON.parse(json) : json;
-    const nodes = obj.nodes.map((o) => objToNode(o, scope));
+    const nodes = obj.nodes.map((o) => objToNode(o));
     const edges = obj.edges;
-    const graph = new ReactiveGraph<DesignerNode>(nodes, edges);
+    const graph = new ReactiveGraph<DesignerNode>(nodes, edges, {
+      nodeBuilder: rxDesignerNodeBuilder,
+    });
     return new Designer(graph, obj.positions, canvas, bgCanvas);
   }
 
@@ -63,15 +84,21 @@ export class Designer {
     const state = new State(initState);
     const { nodes } = this.graph;
 
-    // connect all nodes
-    nodes.forEach(node => node.connect(state));
+    // initialize all nodes
+    nodes.forEach((node) => node.initialize(state));
 
-    const firstNode = nodes[nodes.length - 1];
-    return this.graph.execute(firstNode).subscribe(() => {}, () => {}, () => {
+    const lastNode = nodes.find((node) => node.localId === 'connector');
 
-      // disconnect all nodes
-      nodes.forEach(node => node.disconnect());
-    });
+    if (!lastNode) throw Error('No last node found.');
+
+    return this.graph.execute(lastNode, 0).subscribe(
+      () => {},
+      () => {},
+      () => {
+        // kill all nodes
+        nodes.forEach((node) => node.kill());
+      }
+    );
   }
 
   constructor(
@@ -186,7 +213,20 @@ export class Designer {
       });
     });
 
-    merge(of(void 0), this.dh.markForRepaint, this.mh.markForRepaint)
+    const resize = fromEvent(window, 'resize');
+
+    resize
+      .pipe(
+        tap(() => {
+          this.bgCanvas.width = this.canvas.clientWidth;
+          this.bgCanvas.height = this.canvas.clientHeight;
+          this.drawGrid(this.bgCanvas.getContext('2d'), this.bgCanvas);
+        }),
+        takeUntil(this.unsub)
+      )
+      .subscribe();
+
+    merge(of(void 0), this.dh.markForRepaint, this.mh.markForRepaint, resize)
       .pipe(
         tap(() => {
           this.repaint();
@@ -205,45 +245,50 @@ export class Designer {
 
   private repaint() {
     const ctx = this.canvas.getContext('2d');
+
+    this.canvas.width = this.canvas.clientWidth;
+    this.canvas.height = this.canvas.clientHeight;
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    const lines = this.connections.map(({ source, target, port }) => {
-      const a = this.glNodes[source].query('out-port')[0].centerRight();
-      const b = this.glNodes[target].query('in-port')[port - 1].centerLeft();
-      const dim = subtract(b, a);
-      return glue({
-        xPx: a.x,
-        yPx: a.y,
-        wPx: dim.x,
-        hPx: dim.y,
-        asLine: true,
-        color: colors.connections,
-        customPaint: (gl, ctx) => {
-          const { pos, dim } = gl.cache;
-          const offset = 2;
-          ctx.beginPath();
-          ctx.strokeStyle = gl.props.color || 'white';
-          ctx.lineWidth = 2;
-          ctx.moveTo(pos.x + offset, pos.y);
-          const toX = pos.x + dim.x - offset;
-          const toY = pos.y + dim.y;
-          const delta = Math.sqrt(
-            Math.pow(pos.x - toX, 2) + Math.pow(pos.y - toY, 2)
-          );
-          const smoothing = delta * 0.1;
-          ctx.bezierCurveTo(
-            pos.x + smoothing + offset,
-            pos.y,
-            toX - smoothing,
-            toY,
-            toX,
-            toY
-          );
-          ctx.stroke();
-          ctx.closePath();
-        },
-      });
-    });
+    const lines = this.connections.map(
+      ({ source, target, inPort, outPort }) => {
+        const a = this.glNodes[source].query('out-port')[outPort].centerRight();
+        const b = this.glNodes[target].query('in-port')[inPort].centerLeft();
+        const dim = subtract(b, a);
+        return glue({
+          xPx: a.x,
+          yPx: a.y,
+          wPx: dim.x,
+          hPx: dim.y,
+          asLine: true,
+          color: colors.connections,
+          customPaint: (gl, ctx) => {
+            const { pos, dim } = gl.cache;
+            const offset = 2;
+            ctx.beginPath();
+            ctx.strokeStyle = gl.props.color || 'white';
+            ctx.lineWidth = 2;
+            ctx.moveTo(pos.x + offset, pos.y);
+            const toX = pos.x + dim.x - offset;
+            const toY = pos.y + dim.y;
+            const delta = Math.sqrt(
+              Math.pow(pos.x - toX, 2) + Math.pow(pos.y - toY, 2)
+            );
+            const smoothing = delta * 0.1;
+            ctx.bezierCurveTo(
+              pos.x + smoothing + offset,
+              pos.y,
+              toX - smoothing,
+              toY,
+              toX,
+              toY
+            );
+            ctx.stroke();
+            ctx.closePath();
+          },
+        });
+      }
+    );
     lines.forEach((g) => g.paint(this.canvas));
 
     if (this.dragConnection) {
@@ -287,16 +332,24 @@ export class Designer {
     this.glNodes.forEach((g) => g.paint(this.canvas));
   }
 
-  private getConnections(): { source: number; target: number; port: number }[] {
+  private getConnections(): {
+    source: number;
+    target: number;
+    inPort: number;
+    outPort: number;
+  }[] {
     const connections: any = [];
     this.graph.edges.forEach((edges, source) => {
-      edges.forEach((port, target) => {
-        if (port === 0) return;
-        connections.push({
-          source,
-          target,
-          port,
-        });
+      edges.forEach((conns, target) => {
+        if (conns === 0) return;
+        conns.forEach(([outPort, inPort]) =>
+          connections.push({
+            source,
+            target,
+            outPort,
+            inPort,
+          })
+        );
       });
     });
     return (this.connections = connections);
@@ -328,7 +381,7 @@ export class Designer {
         color: 'transparent',
       },
       [
-        this.getInPorts(node.args.length, node),
+        this.getInPorts(node.inputs.length, node),
         coreGlue(this, node),
         this.getOutPorts(1, node),
         this.getLabel(node),

@@ -14,7 +14,7 @@ export function labelGlue(node: DesignerNode, colors: any) {
       ctx.textAlign = 'center';
       ctx.fillStyle = colors.label;
       ctx.font = 'bold 8pt';
-      ctx.fillText(node.name, pos.x, pos.y);
+      ctx.fillText(node.title, pos.x, pos.y);
       ctx.closePath();
     },
   });

@@ -4,11 +4,10 @@ import { NodeDetailsComponent } from './node-details.component';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { NodeArgComponent } from './node-arg/node-arg.component';
 import { MatIconModule } from '@angular/material/icon';
 
 @NgModule({
-  declarations: [NodeDetailsComponent, NodeArgComponent],
+  declarations: [NodeDetailsComponent],
   imports: [
     CommonModule,
     MatInputModule,
