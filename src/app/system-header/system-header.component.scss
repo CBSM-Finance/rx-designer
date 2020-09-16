@@ -8,13 +8,19 @@ $height: 30px;
   box-sizing: border-box;
   padding: 0;
   flex-direction: row;
-  background-color: rgba(180, 220, 255, 0.1);
+  background-color: rgba(255, 255, 255, .14);
+  -webkit-app-region: drag;
   align-items: center;
 
   .actions {
     .btn {
       margin-left: 8px;
     }
+  }
+
+  .logo {
+    display: block;
+    padding: 0 16px;
   }
 
   .btn {

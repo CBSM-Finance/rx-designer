@@ -1,8 +1,8 @@
 :host {
   display: block;
-  width: 320px;
+  width: 380px;
   color: #fff;
-  background: rgba(180, 220, 255, .1);
+  background: transparent;
   border-left: 1px solid rgba(255, 255, 255, .1);
 
   .content {
@@ -16,23 +16,79 @@
     font-weight: 500;
     line-height: 28px;
     padding: 0 16px;
-    margin: 16px 0;
+    margin: 16px 0 0;
   }
 
   .sub-title {
-    font-size: 14px;
-    color: #aaa;
+    font-size: 12px;
+    color: #fff;
     height: 28px;
     line-height: 28px;
     padding: 0 16px;
     margin-bottom: 4px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .description {
-    color: #fff;
-    padding: 16px;
+    color: #b2b2b2;
+    padding: 8px 16px;
     font-size: 12px;
     line-height: 22px;
+  }
+
+  .input {
+    padding: 8px;
+    font-size: 12px;
+    border: 1px solid rgba(255,255,255,.1);
+    background: rgba(255,255,255,.04);
+    margin: 0 16px 8px;
+    border-radius: 4px;
+
+    .index {
+      padding-right: 8px;
+      letter-spacing: 4px;
+      line-height: 28px;
+    }
+
+    .name {
+      padding-right: 16px;
+      line-height: 28px;
+    }
+
+    input {
+      padding: 0 8px;
+      margin: 0;
+      border: 1px solid rgba(255,255,255,.1);
+      outline: none;
+      background: rgba(255,255,255,.04);
+      line-height: 28px;
+      color: #fff;
+      font-family: 'Roboto';
+      font-weight: 300;
+      font-size: 12px;
+      width: 100%;
+      box-sizing: border-box;
+
+      &:focus {
+        background: transparent;
+      }
+    }
+  }
+
+  .output {
+    padding: 8px;
+    font-size: 12px;
+    border: 1px solid rgba(255,255,255,.1);
+    background: rgba(255,255,255,.04);
+    margin: 0 16px 8px;
+    border-radius: 4px;
+
+    .index {
+      padding-right: 8px;
+      letter-spacing: 4px;
+    }
+
+    .name {
+      padding-right: 16px;
+    }
   }
 }

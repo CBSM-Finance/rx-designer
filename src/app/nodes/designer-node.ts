@@ -20,14 +20,22 @@ export abstract class DesignerNode implements BaseNode {
     return (this.constructor as typeof DesignerNode).LOCAL_ID;
   }
 
-  inputCount() {
-    return this.inputs.length;
+  /**
+   * Node group id.
+   */
+  static GROUP_ID = 'system';
+  get groupId() {
+    return (this.constructor as typeof DesignerNode).GROUP_ID;
   }
 
   state: any;
   inputs: DesignerNodeInput[];
   outputs: DesignerNodeOutput[];
   description: string;
+
+  inputCount() {
+    return this.inputs.length;
+  }
 
   /**
    * Called when graph is executed.

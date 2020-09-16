@@ -1,68 +1,67 @@
-// import { Observable, of } from 'rxjs';
-// import { filter, mapTo, switchMapTo, tap } from 'rxjs/operators';
-// import { ElectronCommunicationService } from 'src/app/electron-communication.service';
-// import { DesignerNode, DesignerNodeArg, DesignerNodeArgType } from '../designer-node';
-// import { LoggerService } from '../../logger.service';
+import { Observable, of, combineLatest } from 'rxjs';
+import { filter, mapTo, share, switchMapTo, tap } from 'rxjs/operators';
+import { ElectronCommunicationService } from 'src/app/electron-communication.service';
+import { DesignerNode } from '../designer-node';
+import { LoggerService } from '../../logger.service';
 
-// export class ConnectTWSNode2 extends DesignerNode {
-//   static TITLE = 'Connect to TWS';
-//   static LOCAL_ID = 'twsConnect';
+export class ConnectTWSNode extends DesignerNode {
+  static TITLE = 'Connect TWS';
 
-//   args: DesignerNodeArg[] = [
-//     {
-//       name: 'URL',
-//       type: DesignerNodeArgType.STRING,
-//       required: false,
-//       description: 'The JSON file path.',
-//     }
-//   ];
+  static GROUP_ID = 'ib';
+  static LOCAL_ID = 'twsConnect';
 
-//   description = `
-//     CONNECT
-//   `;
+  description = 'Connect to TWS.';
 
-//   operator(source: Observable<any>) {
-//     const electron = this.state.get('electron') as ElectronCommunicationService;
-//     const logger = this.state.get('logger') as LoggerService;
-//     return source.pipe(
-//       tap(() => electron.send('ib', 'connect', {
-//         port: 4001,
-//         host: '127.0.0.1',
-//         clientId: 1,
-//       })),
-//       switchMapTo(electron.on('ib', 'message')),
-//       filter(msg => msg.type === 'connection'),
-//       filter(({ connected }) => connected as boolean),
-//       mapTo('Connected to TWS'),
-//       logger.log(msg => ({
-//         level: 'info',
-//         node: this.title,
-//         msg,
-//       })),
-//     );
-//   }
-// }
+  inputs = [
+    {
+      name: 'Impulse',
+    },
+    {
+      name: 'Port',
+      value: 4001,
+    },
+    {
+      name: 'Host',
+      value: '127.0.0.1',
+    },
+    {
+      name: 'Client Id',
+      value: 1,
+    },
+  ];
 
-// export class ConnectTWSNode {
-//   static TITLE = 'Connect to TWS';
-//   static LOCAL_ID = 'twsConnect';
+  outputs = [
+    {
+      name: 'Connected',
+    },
+    {
+      name: 'Disconnected',
+    },
+  ];
 
-//   inputs = [];
+  connect(inputs: Observable<any>[]): Observable<any>[] {
+    const electron = this.state.get('electron') as ElectronCommunicationService;
+    const connect = combineLatest(inputs).pipe(
+      tap(() => console.log('connect tws')),
+      tap(([, port, host, clientId]) =>
+        electron.send('ib', 'connect', {
+          port,
+          host,
+          clientId,
+        })
+      ),
+      switchMapTo(electron.on('ib', 'message')),
+      filter((msg) => msg.type === 'connection'),
+      share()
+    );
 
-//   outputs = [
-//     {
-//       name: 'Connected',
-//       type: 'BOOL',
-//     },
-//   ];
+    const connected = connect.pipe(
+      filter((msg) => msg.connected as boolean),
+    );
 
-//   connect(inputs: Observable<any>) {
-//     const traded = combineLatest(inputs).pipe(
-//       tap(() => { }), // trade contracts
-//     );
-//     return [
-//       traded.pipe(), // on transmit
-//       traded.pipe(), // order status
-//     ];
-//   }
-// }
+    const disconnected = connect.pipe(
+      filter((msg) => !(msg.connected as boolean))
+    );
+    return [connected, disconnected];
+  }
+}

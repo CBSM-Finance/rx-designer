@@ -3,18 +3,22 @@ import { TextNode } from './text.node';
 import { MergeNode } from './merge.node';
 import { PrintNode } from './print.node';
 import { ConnectorNode } from './connector.node';
+import { NumberNode } from './number.node';
+import { IsEvenNode } from './is-even.node';
+import { LaunchIBNode } from './ib/launch-ib.node';
+import { ConnectTWSNode } from './ib/connect-tws.node';
 
 export const nodeGroups: NodeGroup[] = [
   {
     title: 'System',
     id: 'system',
-    nodes: [TextNode, MergeNode, PrintNode, ConnectorNode],
+    nodes: [TextNode, MergeNode, PrintNode, ConnectorNode, NumberNode, IsEvenNode],
   },
-  // {
-  //   title: 'Interactive Brokers',
-  //   id: 'ib',
-  //   nodes: [ConnectTWSNode, LaunchIBNode, IBMessageNode],
-  // },
+  {
+    title: 'Interactive Brokers',
+    id: 'ib',
+    nodes: [ConnectTWSNode, LaunchIBNode],
+  },
 ];
 
 export interface NodeGroup {

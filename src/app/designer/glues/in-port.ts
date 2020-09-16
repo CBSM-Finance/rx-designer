@@ -20,7 +20,7 @@ export function inPortGlue(
     label: 'in-port',
     customPaint: (gl, ctx) => {
       const { pos, dim } = gl.cache;
-      const conn = graph.incomingNode(node, i + 1);
+      const conn = graph.incomingNode(node, i);
 
       ctx.beginPath();
 

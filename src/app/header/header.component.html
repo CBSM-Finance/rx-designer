@@ -1,17 +1,10 @@
-<img class="logo" height="16" src="./assets/logo-cbsm.svg" alt="logo">
-
-<span fxFlex></span>
-
 <div fxLayout="row" class="actions">
-  <div class="btn">
-    <mat-icon>remove</mat-icon>
+  <div class="btn" (click)="save()">
+    <mat-icon>save</mat-icon>
   </div>
-
-  <div class="btn">
-    <mat-icon>fullscreen</mat-icon>
-  </div>
-
-  <div class="btn">
-    <mat-icon>close</mat-icon>
+  <div class="btn" (click)="run()">
+    <mat-icon>play_arrow</mat-icon>
   </div>
 </div>
+
+<span fxFlex></span>

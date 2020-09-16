@@ -1,5 +1,7 @@
 <div fxLayout="column" fxFlex>
-  <app-header></app-header>
+  <app-system-header></app-system-header>
+  <app-header [designer]="designer"></app-header>
+
   <div fxLayout="row" fxFlex>
     <app-node-repository (instantiate)="addNode($event)"></app-node-repository>
     <div class="designer">
@@ -10,4 +12,3 @@
   </div>
   <app-logs></app-logs>
 </div>
-<button (click)="run()">run</button>

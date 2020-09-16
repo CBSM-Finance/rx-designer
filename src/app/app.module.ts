@@ -9,12 +9,14 @@ import { NgxElectronModule } from 'ngx-electron';
 import { HeaderComponent } from './header/header.component';
 import { MatIconModule } from '@angular/material/icon';
 import { LogsComponent } from './logs/logs.component';
+import { SystemHeaderComponent } from './system-header/system-header.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     HeaderComponent,
     LogsComponent,
+    SystemHeaderComponent,
   ],
   imports: [
     BrowserModule,

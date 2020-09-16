@@ -10,18 +10,16 @@ export function objToNode(obj: any): DesignerNode {
   const node = group.nodes.find(n => n.LOCAL_ID === nodeId) as any;
   if (!node) throw new Error(`Node '${nodeId}' in group '${groupId}' could not be found.`);
 
-  // add params...... 88888888888888888888
+  const instance = new node();
+  instance.inputs = obj.inputs;
 
-  return new node();
+  return instance;
 }
 
-// abstract class Person {
-//   name: string;
-// }
-
-// class Employee extends Person {
-// }
-
-// const persons: typeof Person[] = [Employee];
-
-// const dan = new persons[0](); // Cannot create an instance of an abstract class.
+export function nodeToObj(node: DesignerNode): any {
+  const obj = {
+    type: `${node.groupId}.${node.localId}`,
+    inputs: node.inputs,
+  };
+  return obj;
+}

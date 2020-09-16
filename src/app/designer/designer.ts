@@ -2,7 +2,7 @@ import { ReactiveGraph } from '@cbsm-finance/reactive-nodes';
 import { merge, of, from, Subject, Subscription, fromEvent, Observable, EMPTY } from 'rxjs';
 import { tap, takeUntil, switchMapTo, share } from 'rxjs/operators';
 import { DragHandler, Glue, glue, subtract, MouseEventHandler } from '../glue';
-import { objToNode } from './obj-to-node';
+import { objToNode, nodeToObj } from './obj-to-node';
 import { inPortGlue } from './glues/in-port';
 import { outPortGlue } from './glues/out-port';
 import { coreGlue } from './glues/core';
@@ -54,24 +54,28 @@ export class Designer {
     canvas: HTMLCanvasElement,
     bgCanvas: HTMLCanvasElement
   ): Designer {
-    const scope = {
-      reqMktData: (contract) => {
-        return from([
-          { symbol: contract.symbol, bid: Math.random() },
-          { symbol: contract.symbol, ask: Math.random() },
-          { symbol: contract.symbol, bid: Math.random() },
-          { symbol: contract.symbol, ask: Math.random() },
-        ]);
-      },
-    };
-
     const obj = typeof json === 'string' ? JSON.parse(json) : json;
-    const nodes = obj.nodes.map((o) => objToNode(o));
+    const nodes = obj.nodes.map(o => objToNode(o));
     const edges = obj.edges;
     const graph = new ReactiveGraph<DesignerNode>(nodes, edges, {
       nodeBuilder: rxDesignerNodeBuilder,
     });
     return new Designer(graph, obj.positions, canvas, bgCanvas);
+  }
+
+  private toJson(): string {
+    const nodes = this.graph.nodes.map(nodeToObj);
+    const obj = {
+      name: 'Test XXX',
+      nodes,
+      edges: this.graph.edges,
+      positions: this.positions,
+    };
+    return JSON.stringify(obj);
+  }
+
+  save() {
+    localStorage.setItem('graph', this.toJson());
   }
 
   addNode(node: DesignerNode) {
@@ -152,18 +156,25 @@ export class Designer {
             const props = glue.props;
             props.xOffsetPx = startOffset.x + delta.x;
             props.yOffsetPx = startOffset.y + delta.y;
+
+            // update pos in source data
+            const nodeIndex = this.glNodes.indexOf(glue);
+            this.positions[nodeIndex] = [
+              props.xPx + props.xOffsetPx,
+              props.yPx + props.yOffsetPx,
+            ];
           },
         },
         'core'
       );
 
-      gl.query('in-port').forEach((port, h) => {
+      gl.query('in-port').forEach((port, inPort) => {
         this.mh.register(port, {
           onClick: () => {
             const nodes = this.graph.nodes;
-            const incomingNode = this.graph.incomingNode(nodes[i], h + 1);
+            const incomingNode = this.graph.incomingNode(nodes[i], inPort);
             if (!incomingNode) return false;
-            this.graph.disconnect(incomingNode, nodes[i]);
+            this.graph.disconnect(incomingNode, nodes[i], inPort);
             this.getConnections();
           },
         });
@@ -173,7 +184,7 @@ export class Designer {
         onClick: () => (this.selectedNode = this.graph.nodes[i]),
       });
 
-      gl.query('out-port').forEach((port) => {
+      gl.query('out-port').forEach((port, outPort) => {
         this.dh.register(port, {
           setRef: (dg) => dg.path[0],
           onMove: ({ glue, startOffset, delta }) => {
@@ -186,24 +197,24 @@ export class Designer {
             this.glNodes.find((g, h) => {
               if (g === gl) return false;
               const rect = this.canvas.getBoundingClientRect();
-              const portI = g
+              const inPort = g
                 .query('in-port')
                 .findIndex(
                   (p) =>
                     p.intersect(event.pageX - rect.x, event.pageY - rect.y)
                       .length > 0
                 );
-              if (portI === -1) return false;
+              if (inPort === -1) return false;
               const target = this.graph.nodes[h];
               const source = this.graph.nodes[i];
               const currentIncomingNode = this.graph.incomingNode(
                 target,
-                portI + 1
+                inPort
               );
               if (currentIncomingNode) {
-                this.graph.disconnect(currentIncomingNode, target);
+                this.graph.disconnect(currentIncomingNode, target, inPort);
               }
-              this.graph.connect(source, target, portI + 1);
+              this.graph.connect(source, target, outPort, inPort);
               this.getConnections();
               return true;
             });
@@ -375,15 +386,15 @@ export class Designer {
       {
         wPx: this.gridSize * 4,
         hPx: this.gridSize * 2,
-        xPx: x * this.gridSize * 4,
-        yPx: y * this.gridSize * 4,
+        xPx: x,
+        yPx: y,
         snapToGrid: this.gridSize,
         color: 'transparent',
       },
       [
         this.getInPorts(node.inputs.length, node),
         coreGlue(this, node),
-        this.getOutPorts(1, node),
+        this.getOutPorts(node.outputs.length, node),
         this.getLabel(node),
       ]
     );

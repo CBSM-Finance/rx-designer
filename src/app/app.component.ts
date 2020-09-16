@@ -1,15 +1,10 @@
 import {
   Component,
-  AfterViewInit,
+  AfterViewInit, ChangeDetectorRef
 } from '@angular/core';
 import { Designer } from './designer/designer';
 import * as json from './conf.json';
 import { DesignerNode } from './nodes/designer-node';
-import { ElectronCommunicationService } from './electron-communication.service';
-import { tap } from 'rxjs/operators';
-import { EMPTY, Subscription } from 'rxjs';
-import { LoggerService } from './logger.service';
-import { subtract } from './glue';
 
 @Component({
   selector: 'app-root',
@@ -19,11 +14,8 @@ import { subtract } from './glue';
 export class AppComponent implements AfterViewInit {
   designer: Designer;
 
-  private sub: Subscription;
-
   constructor(
-    private ecs: ElectronCommunicationService,
-    private logger: LoggerService,
+    private cdRef: ChangeDetectorRef,
   ) { }
 
   ngAfterViewInit() {
@@ -33,15 +25,9 @@ export class AppComponent implements AfterViewInit {
     )[0] as HTMLCanvasElement;
     canvas.width = bgCanvas.width = canvas.clientWidth;
     canvas.height = bgCanvas.height = canvas.clientHeight;
-    this.designer = Designer.fromJson((json as any).default, canvas, bgCanvas);
-  }
-
-  run() {
-    if (this.sub) this.sub.unsubscribe();
-    this.sub = this.designer.run({
-      electron: this.ecs,
-      logger: this.logger,
-    });
+    const graphJson = localStorage.getItem('graph') || (json as any).default;
+    this.designer = Designer.fromJson(graphJson, canvas, bgCanvas);
+    this.cdRef.detectChanges();
   }
 
   addNode(node: DesignerNode) {

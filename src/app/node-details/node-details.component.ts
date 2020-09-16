@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { DesignerNode } from '../nodes/designer-node';
+import { DesignerNode, DesignerNodeInput } from '../nodes/designer-node';
 
 @Component({
   selector: 'app-node-details',
@@ -12,5 +12,9 @@ export class NodeDetailsComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+  }
+
+  updateInput(input: DesignerNodeInput, evt: Event) {
+    input.value = (evt.target as HTMLInputElement).value;
   }
 }

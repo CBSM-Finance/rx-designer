@@ -1,10 +1,21 @@
 <div class="title">{{node.title}}</div>
 <div class="description">
-    {{node.description}}
+  {{node.description}}
 </div>
 
-<div class="sub-title">Arguments</div>
-
+<div class="sub-title">Inputs</div>
+<div class="input" fxLayoutAlign="center start" fxLayout="column" *ngFor="let input of node.inputs; let i = index">
+  <div fxLayoutAlign="center center" fxLayout="row">
+    <div class="index">{{i}}:</div>
+    <div class="name">{{input.name}}</div>
+  </div>
+  <input fxFlex [value]="input.value || ''" (change)="updateInput(input, $event)" type="text">
+</div>
+<div class="sub-title">Outputs</div>
+<div class="output" fxLayoutAlign="center center" fxLayout="row" *ngFor="let output of node.outputs; let i = index">
+  <div class="index">{{i}}:</div>
+  <div class="name" fxFlex>{{output.name}}</div>
+</div>
 <!-- <app-node-arg *ngFor="let arg of node.args" [arg]="arg"></app-node-arg> -->
 <!-- 
 <div class="content">
