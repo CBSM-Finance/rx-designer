@@ -12,11 +12,13 @@ export const nodeGroups: NodeGroup[] = [
   {
     title: 'System',
     id: 'system',
+    color: '#f2f244',
     nodes: [TextNode, MergeNode, PrintNode, ConnectorNode, NumberNode, IsEvenNode],
   },
   {
     title: 'Interactive Brokers',
     id: 'ib',
+    color: '#D81222',
     nodes: [ConnectTWSNode, LaunchIBNode],
   },
 ];
@@ -24,5 +26,6 @@ export const nodeGroups: NodeGroup[] = [
 export interface NodeGroup {
   readonly title: string;
   readonly id: string;
+  readonly color: string;
   readonly nodes: typeof DesignerNode[];
 }

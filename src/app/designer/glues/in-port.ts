@@ -16,7 +16,8 @@ export function inPortGlue(
   return glue({
     wPc: 1,
     hPx: height,
-    yPx: -((count - 1) * d) / 2 + d * i + parentHeight / 2 - height / 2,
+    yPx: i * d,
+    // yPx: -((count - 1) * d) / 2 + d * i + parentHeight / 2 - height / 2,
     label: 'in-port',
     customPaint: (gl, ctx) => {
       const { pos, dim } = gl.cache;

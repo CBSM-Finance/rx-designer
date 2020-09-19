@@ -278,7 +278,7 @@ export class Designer {
             const offset = 2;
             ctx.beginPath();
             ctx.strokeStyle = gl.props.color || 'white';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 1;
             ctx.moveTo(pos.x + offset, pos.y);
             const toX = pos.x + dim.x - offset;
             const toY = pos.y + dim.y;
