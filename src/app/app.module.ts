@@ -10,6 +10,7 @@ import { HeaderComponent } from './header/header.component';
 import { MatIconModule } from '@angular/material/icon';
 import { LogsComponent } from './logs/logs.component';
 import { SystemHeaderComponent } from './system-header/system-header.component';
+import { MarblesModule } from './marbles/marbles.module';
 
 @NgModule({
   declarations: [
@@ -26,6 +27,7 @@ import { SystemHeaderComponent } from './system-header/system-header.component';
     NodeDetailsModule,
     NgxElectronModule,
     MatIconModule,
+    MarblesModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

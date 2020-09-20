@@ -1,18 +1,21 @@
 :host {
   display: grid;
-  background: rgba(180, 220, 255, .1);
-  border-top: 1px solid rgba(255, 255, 255, .1);
-  color: #fff;
-  height: 280px;
+  background: #fff;
+  border-top: 1px solid rgba(0, 0, 0, .08);
+  color: #111;
+  height: 220px;
   width: 100%;
   box-sizing: border-box;
   grid-template-rows: 29px auto;
 
   header {
     height: 28px;
-    border-bottom: 1px solid rgba(255, 255, 255, .1);
+    border-bottom: 1px solid rgba(0, 0, 0, .08);
     padding: 0 16px;
     line-height: 28px;
+    font-size: 9pt;
+    letter-spacing: .1px;
+    font-weight: 500;
   }
 
   .scroll-container {
@@ -44,8 +47,6 @@
         text-overflow: ellipsis;
         padding-right: 16px;
       }
-
-      .msg {}
     }
 
 

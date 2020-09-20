@@ -1,4 +1,4 @@
-<div class="title">Node Repository</div>
+<header>Node Repository</header>
 <div class="group" *ngFor="let group of nodeGroups">
   <div class="group-title">{{group.title}}</div>
   <div class="node" *ngFor="let node of group.nodes" (click)="addNode(node)">

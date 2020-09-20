@@ -1,6 +1,15 @@
 import { ReactiveGraph } from '@cbsm-finance/reactive-nodes';
-import { merge, of, from, Subject, Subscription, fromEvent, Observable, EMPTY } from 'rxjs';
-import { tap, takeUntil, switchMapTo, share } from 'rxjs/operators';
+import {
+  merge,
+  of,
+  from,
+  Subject,
+  Subscription,
+  fromEvent,
+  Observable,
+  EMPTY,
+} from 'rxjs';
+import { tap, takeUntil, switchMapTo, share, observeOn } from 'rxjs/operators';
 import { DragHandler, Glue, glue, subtract, MouseEventHandler } from '../glue';
 import { objToNode, nodeToObj } from './obj-to-node';
 import { inPortGlue } from './glues/in-port';
@@ -10,27 +19,39 @@ import { labelGlue } from './glues/label';
 import { DesignerNode } from '../nodes/designer-node';
 import { State } from '../state';
 import { NodeBuilder } from '@cbsm-finance/reactive-nodes/dist/reactive-graph';
+import { MarblesService } from '../marbles/marbles.service';
+import { LoggerService } from '../logger.service';
+import { asapScheduler } from 'rxjs';
 
 const colors = {
-  bg: '#121218',
-  grid: '#444',
-  ports: '#fff',
-  label: '#fff',
-  connections: '#fff',
+  bg: '#fff',
+  grid: '#e2e2e4',
+  ports: '#888',
+  label: '#000',
+  connections: '#aaa',
   dragConnection: '#aaa',
 };
 
 /**
  * Custom node builder that resolves fallback values.
  */
-export const rxDesignerNodeBuilder: NodeBuilder = (node: DesignerNode, inputs) => {
+export const rxDesignerNodeBuilder = (ms: MarblesService): NodeBuilder => (
+  node: DesignerNode,
+  inputs,
+  graph: ReactiveGraph<DesignerNode>
+) => {
   const resolvedInputs = inputs.map((input, i) => {
     if (input !== EMPTY) return input;
     const fallbackVal = node.inputs[i].value;
     if (fallbackVal === void 0) return EMPTY;
     return of(fallbackVal);
   });
-  return node.connect(resolvedInputs) as Observable<any>[];
+  return (node.connect(resolvedInputs) as Observable<any>[]).map((output, i) =>
+    output.pipe(
+      observeOn(asapScheduler),
+      tap((data) => ms.nodeOutput(node, node.outputs[i], data, graph))
+    )
+  );
 };
 
 export class Designer {
@@ -52,26 +73,17 @@ export class Designer {
   static fromJson(
     json: string | any,
     canvas: HTMLCanvasElement,
-    bgCanvas: HTMLCanvasElement
+    bgCanvas: HTMLCanvasElement,
+    ms: MarblesService,
+    logger: LoggerService,
   ): Designer {
     const obj = typeof json === 'string' ? JSON.parse(json) : json;
-    const nodes = obj.nodes.map(o => objToNode(o));
+    const nodes = obj.nodes.map((o) => objToNode(o));
     const edges = obj.edges;
     const graph = new ReactiveGraph<DesignerNode>(nodes, edges, {
-      nodeBuilder: rxDesignerNodeBuilder,
+      nodeBuilder: rxDesignerNodeBuilder(ms),
     });
-    return new Designer(graph, obj.positions, canvas, bgCanvas);
-  }
-
-  private toJson(): string {
-    const nodes = this.graph.nodes.map(nodeToObj);
-    const obj = {
-      name: 'Test XXX',
-      nodes,
-      edges: this.graph.edges,
-      positions: this.positions,
-    };
-    return JSON.stringify(obj);
+    return new Designer(graph, obj.positions, canvas, bgCanvas, ms, logger);
   }
 
   save() {
@@ -95,10 +107,18 @@ export class Designer {
 
     if (!lastNode) throw Error('No last node found.');
 
+    this.ms.reset();
+    this.logger.reset();
+
     return this.graph.execute(lastNode, 0).subscribe(
       () => {},
-      () => {},
+      (err) => {
+
+        // kill all nodes
+        nodes.forEach((node) => node.kill());
+      },
       () => {
+
         // kill all nodes
         nodes.forEach((node) => node.kill());
       }
@@ -109,12 +129,25 @@ export class Designer {
     private graph: ReactiveGraph<DesignerNode>,
     private positions: number[][],
     private canvas: HTMLCanvasElement,
-    private bgCanvas: HTMLCanvasElement
+    private bgCanvas: HTMLCanvasElement,
+    private ms: MarblesService,
+    private logger: LoggerService,
   ) {
     bgCanvas.style.backgroundColor = colors.bg;
     this.drawGrid(bgCanvas.getContext('2d'), bgCanvas);
 
     this.reload();
+  }
+
+  private toJson(): string {
+    const nodes = this.graph.nodes.map(nodeToObj);
+    const obj = {
+      name: 'Test XXX',
+      nodes,
+      edges: this.graph.edges,
+      positions: this.positions,
+    };
+    return JSON.stringify(obj);
   }
 
   private reload() {

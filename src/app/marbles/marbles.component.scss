@@ -1,0 +1,24 @@
+:host {
+  background: #fff;
+  border-top: 1px solid rgba(0, 0, 0, .08);
+  border-right: 1px solid rgba(0, 0, 0, .08);
+  color: #111;
+  width: 100%;
+  height: 220px;
+  display: flex;
+  flex-direction: column;
+
+  header {
+    height: 28px;
+    border-bottom: 1px solid rgba(0, 0, 0, .08);
+    padding: 0 16px;
+    line-height: 28px;
+    font-size: 9pt;
+    letter-spacing: .1px;
+    font-weight: 500;
+  }
+
+  .content {
+    overflow: auto;
+  }
+}

@@ -1,0 +1,6 @@
+<header>
+    Execution Graph
+</header>
+<div class="content" fxFlex>
+    <app-marble-line [node]="node" *ngFor="let node of nodes | async"></app-marble-line>
+</div>

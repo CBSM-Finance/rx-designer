@@ -19,14 +19,19 @@ export function coreGlue(designer: Designer, node: DesignerNode) {
     label: 'core',
     customPaint: (gl, ctx) => {
       const { pos, dim } = gl.cache;
-      ctx.beginPath();
+      // ctx.beginPath();
       ctx.strokeStyle = gl.props.hover ? '#aaa' : 'white';
       ctx.lineWidth = 1;
-      roundedRect(ctx, pos.x, pos.y + 0.5, dim.x, dim.y, 2);
-      ctx.closePath();
-      ctx.fillStyle = designer.selectedNode === node ? '#aaa' : group.color;
-      ctx.stroke();
-      ctx.fill();
+      // roundedRect(ctx, pos.x, pos.y + 0.5, dim.x, dim.y, 2);
+      ctx.fillStyle = '#e2e2e2';
+      ctx.strokeStyle = '#aaa';
+
+      ctx.fillRect(pos.x, pos.y + .5, dim.x, dim.y);
+      ctx.strokeRect(pos.x, pos.y + .5, dim.x, dim.y);
+      // ctx.closePath();
+      // ctx.fillStyle = designer.selectedNode === node ? '#aaa' : group.color;
+      // ctx.stroke();
+      // ctx.fill();
     },
   });
 }

@@ -18,12 +18,4 @@ $dark-accent:  mat-palette($mat-amber, A200, A100, A400);
 $dark-warn:    mat-palette($mat-deep-orange);
 $dark-theme:   mat-dark-theme($dark-primary, $dark-accent, $dark-warn);
 
-// $dark-app-theme: mat-light-theme((
-//   color: (
-//     primary: $candy-app-primary,
-//     accent: $candy-app-accent,
-//     warn: $candy-app-warn,  
-//   )
-// ));
-
 @include angular-material-theme($dark-theme);

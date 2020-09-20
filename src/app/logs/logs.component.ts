@@ -2,7 +2,6 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { LoggerService, Log } from '../logger.service';
 import { Observable } from 'rxjs';
 import { SubSink } from 'subsink';
-import { scan } from 'rxjs/operators';
 
 @Component({
   selector: 'app-logs',
@@ -17,9 +16,7 @@ export class LogsComponent implements OnInit, OnDestroy {
   constructor(
     logger: LoggerService,
   ) {
-    this.logs = logger.logs.pipe(
-      scan((acc, log) => [log, ...acc], []),
-    );
+    this.logs = logger.logs;
   }
 
   trackByFn(index: number) {

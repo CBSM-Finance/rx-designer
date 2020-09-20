@@ -5,9 +5,6 @@ import { handleEvents } from './handle-events';
 
 let mainWindow: any;
 
-// const args = process.argv.slice(1);
-// const serve = args.some((val) => val === '--serve');
-
 require('electron-reload')(__dirname);
 initAppListeners();
 
