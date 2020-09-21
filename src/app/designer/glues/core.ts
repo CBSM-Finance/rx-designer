@@ -2,36 +2,40 @@ import { glue } from 'src/app/glue';
 import { roundedRect } from '../paint/rounded-rect';
 import { Designer } from '../designer';
 import { DesignerNode } from 'src/app/nodes/designer-node';
-import { nodeGroups } from 'src/app/nodes/node-groups';
+import { designerVars } from '../designer-vars';
 
 export function coreGlue(designer: Designer, node: DesignerNode) {
-  const d = 14;
-  const s = designer.gridSize * 2;
-  const height = Math.max(node.inputs.length, node.outputs.length) * d;
-  const group = nodeGroups.find(g => g.id === node.groupId);
+  const s = designerVars.cellSize * 14;
   return glue({
-    anchor: 'center',
-    xPx: -s / 2,
-    yPx: -s / 2,
-    wPx: s,
-    // hPx: s,
-    hPx: height,
+    anchor: 'topLeft',
+    xPx: 0,
+    yPx: 0,
+    wPc: 1,
+    hPc: 1,
     label: 'core',
     customPaint: (gl, ctx) => {
       const { pos, dim } = gl.cache;
-      // ctx.beginPath();
-      ctx.strokeStyle = gl.props.hover ? '#aaa' : 'white';
-      ctx.lineWidth = 1;
-      // roundedRect(ctx, pos.x, pos.y + 0.5, dim.x, dim.y, 2);
-      ctx.fillStyle = '#e2e2e2';
-      ctx.strokeStyle = '#aaa';
 
-      ctx.fillRect(pos.x, pos.y + .5, dim.x, dim.y);
-      ctx.strokeRect(pos.x, pos.y + .5, dim.x, dim.y);
-      // ctx.closePath();
-      // ctx.fillStyle = designer.selectedNode === node ? '#aaa' : group.color;
-      // ctx.stroke();
-      // ctx.fill();
+      ctx.save();
+      ctx.fillStyle = 'rgba(232, 232, 232, .8)';
+      // ctx.fillStyle = '#EFEFEF';
+      ctx.shadowColor = '#dadada';
+
+      if (designer.selectedNode === node) {
+        ctx.lineWidth = 2;
+        ctx.shadowBlur = 8;
+        ctx.strokeStyle = '#b8b8f8';
+      } else {
+        ctx.shadowBlur = gl.props.hover ? 8 : 0;
+        ctx.strokeStyle = '#b8b8b8';
+      }
+
+      ctx.beginPath();
+      roundedRect(ctx, pos.x, pos.y + .5, dim.x, dim.y, designerVars.cellSize);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.fill();
+      ctx.restore();
     },
   });
 }

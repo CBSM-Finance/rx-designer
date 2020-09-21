@@ -22,6 +22,7 @@ import { NodeBuilder } from '@cbsm-finance/reactive-nodes/dist/reactive-graph';
 import { MarblesService } from '../marbles/marbles.service';
 import { LoggerService } from '../logger.service';
 import { asapScheduler } from 'rxjs';
+import { designerVars } from './designer-vars';
 
 const colors = {
   bg: '#fff',
@@ -75,7 +76,7 @@ export class Designer {
     canvas: HTMLCanvasElement,
     bgCanvas: HTMLCanvasElement,
     ms: MarblesService,
-    logger: LoggerService,
+    logger: LoggerService
   ): Designer {
     const obj = typeof json === 'string' ? JSON.parse(json) : json;
     const nodes = obj.nodes.map((o) => objToNode(o));
@@ -113,12 +114,12 @@ export class Designer {
     return this.graph.execute(lastNode, 0).subscribe(
       () => {},
       (err) => {
+        console.log('err', err);
 
         // kill all nodes
         nodes.forEach((node) => node.kill());
       },
       () => {
-
         // kill all nodes
         nodes.forEach((node) => node.kill());
       }
@@ -131,7 +132,7 @@ export class Designer {
     private canvas: HTMLCanvasElement,
     private bgCanvas: HTMLCanvasElement,
     private ms: MarblesService,
-    private logger: LoggerService,
+    private logger: LoggerService
   ) {
     bgCanvas.style.backgroundColor = colors.bg;
     this.drawGrid(bgCanvas.getContext('2d'), bgCanvas);
@@ -181,6 +182,45 @@ export class Designer {
           });
         });
 
+      gl.query('out-port').forEach((port, outPort) => {
+        this.dh.register(port, {
+          setRef: (dg) => dg.path[0],
+          onMove: ({ glue, delta }) => {
+            this.dragConnection = {
+              from: glue.center(),
+              to: delta,
+            };
+          },
+          onDrop: ({ event }) => {
+            this.glNodes.find((g, h) => {
+              if (g === gl) return false;
+              const rect = this.canvas.getBoundingClientRect();
+              const inPort = g
+                .query('in-port')
+                .findIndex(
+                  (p) =>
+                    p.intersect(event.pageX - rect.x, event.pageY - rect.y)
+                      .length > 0
+                );
+              if (inPort === -1) return false;
+              const target = this.graph.nodes[h];
+              const source = this.graph.nodes[i];
+              const currentIncomingNode = this.graph.incomingNode(
+                target,
+                inPort
+              );
+              if (currentIncomingNode) {
+                this.graph.disconnect(currentIncomingNode, target, inPort);
+              }
+              this.graph.connect(source, target, outPort, inPort);
+              this.getConnections();
+              return true;
+            });
+            this.dragConnection = void 0;
+          },
+        });
+      });
+
       this.dh.register(
         gl,
         {
@@ -215,45 +255,6 @@ export class Designer {
 
       this.mh.register(gl.query('core')[0], {
         onClick: () => (this.selectedNode = this.graph.nodes[i]),
-      });
-
-      gl.query('out-port').forEach((port, outPort) => {
-        this.dh.register(port, {
-          setRef: (dg) => dg.path[0],
-          onMove: ({ glue, startOffset, delta }) => {
-            this.dragConnection = {
-              from: glue.center(),
-              to: delta,
-            };
-          },
-          onDrop: ({ event }) => {
-            this.glNodes.find((g, h) => {
-              if (g === gl) return false;
-              const rect = this.canvas.getBoundingClientRect();
-              const inPort = g
-                .query('in-port')
-                .findIndex(
-                  (p) =>
-                    p.intersect(event.pageX - rect.x, event.pageY - rect.y)
-                      .length > 0
-                );
-              if (inPort === -1) return false;
-              const target = this.graph.nodes[h];
-              const source = this.graph.nodes[i];
-              const currentIncomingNode = this.graph.incomingNode(
-                target,
-                inPort
-              );
-              if (currentIncomingNode) {
-                this.graph.disconnect(currentIncomingNode, target, inPort);
-              }
-              this.graph.connect(source, target, outPort, inPort);
-              this.getConnections();
-              return true;
-            });
-            this.dragConnection = void 0;
-          },
-        });
       });
     });
 
@@ -417,16 +418,18 @@ export class Designer {
   private addItem(x: number, y: number, node: DesignerNode): Glue {
     const gl = glue(
       {
-        wPx: this.gridSize * 4,
-        hPx: this.gridSize * 2,
+        wPx: designerVars.cellSize * 14,
+        hPx:
+          designerVars.cellSize *
+          ((node.inputCount() + node.outputCount()) * 2 + 1),
         xPx: x,
         yPx: y,
         snapToGrid: this.gridSize,
         color: 'transparent',
       },
       [
-        this.getInPorts(node.inputs.length, node),
         coreGlue(this, node),
+        this.getInPorts(node.inputs.length, node),
         this.getOutPorts(node.outputs.length, node),
         this.getLabel(node),
       ]
@@ -440,19 +443,18 @@ export class Designer {
 
   private getOutPorts(count: number, node: DesignerNode) {
     const items = [];
-    const height = 10;
-    const d = height + 4;
-    const parentHeight = this.gridSize * 2;
+    const cellSize = designerVars.cellSize;
+
+    const y = (node.inputCount() * 2 + 1) * cellSize;
+
     for (let i = 0; i < count; i++) {
-      items.push(
-        outPortGlue(height, count, d, i, parentHeight, node, colors, this.graph)
-      );
+      items.push(outPortGlue(y + i * 2 * cellSize, i, node, this.graph));
     }
     return glue(
       {
-        hPc: 1,
-        wPx: 10,
-        xPx: -10,
+        hPx: cellSize,
+        wPx: cellSize,
+        xPx: -cellSize * 2,
         anchor: 'topRight',
         color: 'transparent',
       },
@@ -462,19 +464,15 @@ export class Designer {
 
   private getInPorts(count: number, node: DesignerNode) {
     const items = [];
-    const height = 10;
-    const d = height + 4;
-    const parentHeight = this.gridSize * 2;
+    const cellSize = designerVars.cellSize;
     for (let i = 0; i < count; i++) {
-      items.push(
-        inPortGlue(height, count, d, i, parentHeight, node, colors, this.graph)
-      );
+      items.push(inPortGlue((i * 2 + 1) * cellSize, i, node, this.graph));
     }
     return glue(
       {
-        hPc: 1,
-        wPx: 10,
-        xPx: 0,
+        hPx: cellSize,
+        wPx: cellSize,
+        xPx: cellSize,
         color: 'transparent',
       },
       items

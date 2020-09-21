@@ -1,59 +1,6 @@
 {
-  "name": "Print Text Test",
-  "nodes": [{
-    "type": "system.text",
-    "inputs": [{
-      "name": "Text",
-      "value": "Lorem",
-      "type": "Text"
-    }]
-  }, {
-    "type": "system.text",
-    "inputs": [{
-      "name": "Text",
-      "value": "Ipsum",
-      "type": "Text"
-    }]
-  }, {
-    "type": "system.merge",
-    "inputs": [{
-      "name": "First"
-    }, {
-      "name": "Second"
-    }]
-  }, {
-    "type": "system.print",
-    "inputs": [{
-      "name": "Text",
-      "type": "Text"
-    }]
-  }, {
-    "type": "system.connector",
-    "inputs": [{
-      "name": "First"
-    },
-    {
-      "name": "Second"
-    },
-    {
-      "name": "Third"
-    },
-    {
-      "name": "Fourth"
-    }]
-  }],
-  "edges": [
-    [0, 0, [[0, 0]], 0, 0],
-    [0, 0, [[0, 1]], 0, 0],
-    [0, 0, 0, [[0, 0]], 0],
-    [0, 0, 0, 0, [[0, 0]]],
-    [0, 0, 0, 0, 0]
-  ],
-  "positions": [
-    [64, 64],
-    [64, 192],
-    [192, 128],
-    [320, 128],
-    [448, 128]
-  ]
+  "name": "Test Graph",
+  "nodes": [],
+  "edges": [],
+  "positions": []
 }

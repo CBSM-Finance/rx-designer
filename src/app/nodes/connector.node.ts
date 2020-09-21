@@ -1,5 +1,4 @@
 import { Observable, merge } from 'rxjs';
-import { tap } from 'rxjs/operators';
 import { DesignerNode } from './designer-node';
 
 export class ConnectorNode extends DesignerNode {
@@ -9,15 +8,6 @@ export class ConnectorNode extends DesignerNode {
   inputs = [
     {
       name: 'First',
-    },
-    {
-      name: 'Second',
-    },
-    {
-      name: 'Third',
-    },
-    {
-      name: 'Fourth',
     },
   ];
   outputs = [

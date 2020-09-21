@@ -37,6 +37,10 @@ export abstract class DesignerNode implements BaseNode {
     return this.inputs.length;
   }
 
+  outputCount() {
+    return this.outputs.length;
+  }
+
   /**
    * Called when graph is executed.
    */

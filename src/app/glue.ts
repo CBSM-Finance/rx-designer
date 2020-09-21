@@ -239,7 +239,7 @@ export class MouseEventHandler {
           this.mouseEventConfs
             .filter(
               (conf) =>
-                conf.glue.intersect(
+                (conf.glue as Glue).intersect(
                   ev.pageX - rect.x,
                   ev.pageY - rect.y
                 ).length > 0

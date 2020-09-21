@@ -7,6 +7,7 @@ import { NumberNode } from './number.node';
 import { IsEvenNode } from './is-even.node';
 import { LaunchIBNode } from './ib/launch-ib.node';
 import { ConnectTWSNode } from './ib/connect-tws.node';
+import { IfNode } from './math/if.node';
 
 export const nodeGroups: NodeGroup[] = [
   {
@@ -14,6 +15,12 @@ export const nodeGroups: NodeGroup[] = [
     id: 'system',
     color: '#f2f244',
     nodes: [TextNode, MergeNode, PrintNode, ConnectorNode, NumberNode, IsEvenNode],
+  },
+  {
+    title: 'Math',
+    id: 'math',
+    color: '#1288a2',
+    nodes: [IfNode],
   },
   {
     title: 'Interactive Brokers',

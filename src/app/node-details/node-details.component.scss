@@ -1,27 +1,28 @@
 :host {
   display: block;
   width: 380px;
-  color: #fff;
-  background: transparent;
-  border-left: 1px solid rgba(255, 255, 255, .1);
+  color: #111;
+  border-left: 1px solid rgba(0, 0, 0, .08);
+  background: #fff;
 
   .content {
     padding: 0 16px;
   }
 
-  .title {
-    font-size: 16px;
-    color: #fff;
+  header {
     height: 28px;
-    font-weight: 500;
-    line-height: 28px;
+    border-bottom: 1px solid rgba(0, 0, 0, .08);
     padding: 0 16px;
-    margin: 16px 0 0;
+    line-height: 28px;
+    font-size: 9pt;
+    letter-spacing: .1px;
+    font-weight: 500;
+    margin-bottom: 4px;
   }
 
   .sub-title {
     font-size: 12px;
-    color: #fff;
+    color: #111;
     height: 28px;
     line-height: 28px;
     padding: 0 16px;
@@ -29,7 +30,7 @@
   }
 
   .description {
-    color: #b2b2b2;
+    color: #111;
     padding: 8px 16px;
     font-size: 12px;
     line-height: 22px;
@@ -38,8 +39,8 @@
   .input {
     padding: 8px;
     font-size: 12px;
-    border: 1px solid rgba(255,255,255,.1);
-    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(0,0,0,.1);
+    background: rgba(0,0,0,.04);
     margin: 0 16px 8px;
     border-radius: 4px;
 
@@ -57,9 +58,9 @@
     input {
       padding: 0 8px;
       margin: 0;
-      border: 1px solid rgba(255,255,255,.1);
+      border: 1px solid rgba(0,0,0,.1);
       outline: none;
-      background: rgba(255,255,255,.04);
+      background: rgba(0,0,0,.04);
       line-height: 28px;
       color: #fff;
       font-family: 'Roboto';
@@ -77,8 +78,8 @@
   .output {
     padding: 8px;
     font-size: 12px;
-    border: 1px solid rgba(255,255,255,.1);
-    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(0,0,0,.1);
+    background: rgba(0,0,0,.04);
     margin: 0 16px 8px;
     border-radius: 4px;
 

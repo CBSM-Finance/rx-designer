@@ -5,11 +5,8 @@ import {
 import { Designer } from './designer/designer';
 import * as json from './conf.json';
 import { DesignerNode } from './nodes/designer-node';
-import { combineLatest, fromEvent, of } from 'rxjs';
 import { MarblesService } from './marbles/marbles.service';
-import { subtract } from './glue';
 import { LoggerService } from './logger.service';
-import { tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
