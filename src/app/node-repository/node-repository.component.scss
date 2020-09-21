@@ -17,14 +17,48 @@
   }
 
   .group {
-      margin-bottom: 16px;
+    height: 28px;
+    overflow: hidden;
+
+    &.show {
+      height: auto;
+
+      .group-title > mat-icon.expand {
+        transform: rotate(0);
+      }
+    }
 
     .group-title {
-      color: #aaa;
       height: 28px;
       line-height: 28px;
+      padding: 0 8px;
+      cursor: default;
+
+      &:hover {
+        mat-icon.expand {
+          color: #111;
+        }
+      }
+
+      mat-icon {
+        height: 28px;
+        line-height: 28px;
+
+        &.expand {
+          transition: transform .1s ease;
+          transform: rotate(-90deg);
+          color: #aaa;
+        }
+      }
+
+      span {
+        padding-left: 4px;
+        font-weight: 500;
+      }
+    }
+
+    .group-content {
       padding: 0 16px;
-      margin-bottom: 4px;
     }
 
     .node {

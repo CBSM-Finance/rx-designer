@@ -1,7 +1,14 @@
 <header>Node Repository</header>
-<div class="group" *ngFor="let group of nodeGroups">
-  <div class="group-title">{{group.title}}</div>
-  <div class="node" *ngFor="let node of group.nodes" (click)="addNode(node)">
-    {{node.TITLE}}
+<div class="group" [class.show]="showGroup(group)" *ngFor="let group of nodeGroups">
+  <div fxLayout="row" fxLayoutAlign="center center" class="group-title"
+    (click)="toggle(group)">
+    <mat-icon class="expand">expand_more</mat-icon>
+    <mat-icon [style.color]="group.color">{{group.icon}}</mat-icon>
+    <span fxFlex>{{group.title}}</span>
+  </div>
+  <div class="group-content">
+    <div class="node" *ngFor="let node of group.nodes" (click)="addNode(node)">
+      {{node.TITLE}}
+    </div>
   </div>
 </div>
