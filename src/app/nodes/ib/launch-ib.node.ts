@@ -24,6 +24,7 @@ export class LaunchIBNode extends DesignerNode {
     const logger = this.state.get('logger') as LoggerService;
     const launched = of(true).pipe(
       switchMap(() => electron.send('ib', 'launch', {}, true)),
+      first(),
       logger.log((msg) => ({
         level: 'info',
         node: this.title,

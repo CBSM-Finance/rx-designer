@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ElectronService } from 'ngx-electron';
 import { EMPTY, Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -20,9 +19,7 @@ export class ElectronCommunicationService {
     setTimeout(() => this.es.ipcRenderer.send(channel, data), 0);
 
     if (!expectResponse) return EMPTY;
-    return this.on(channel, respondCommand).pipe(
-      first(),
-    );
+    return this.on(channel, respondCommand);
   }
 
   on(channel: string, command: string): Observable<any> {

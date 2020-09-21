@@ -19,6 +19,7 @@
   .group {
     height: 28px;
     overflow: hidden;
+    margin-bottom: 4px;
 
     &.show {
       height: auto;
@@ -67,7 +68,6 @@
       line-height: 28px;
       padding: 0 16px;
       cursor: pointer;
-      border-radius: 0;
       text-align: left;
       margin: 4px;
       display: block;

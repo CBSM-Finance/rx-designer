@@ -1,7 +1,7 @@
 import { SubSink } from 'subsink';
 import { IpcMain, ipcMain } from 'electron';
-import { mainWindow } from 'main';
 import { log } from '../log';
+import { mainWindow } from '../main';
 
 export class EventHandler {
   subs = new SubSink();
@@ -28,7 +28,7 @@ export class EventHandler {
       try {
         await callback(data);
       } catch (e) {
-        throw e;
+        log.error(channel, data.command, e);
       }
     });
   }

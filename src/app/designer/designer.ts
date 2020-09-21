@@ -23,6 +23,7 @@ import { MarblesService } from '../marbles/marbles.service';
 import { LoggerService } from '../logger.service';
 import { asapScheduler } from 'rxjs';
 import { designerVars } from './designer-vars';
+import { connectedNodes } from '../marbles/connected-nodes';
 
 const colors = {
   bg: '#fff',
@@ -99,7 +100,7 @@ export class Designer {
 
   run(initState: any): () => void {
     const state = new State(initState);
-    const { nodes } = this.graph;
+    const nodes = connectedNodes(this.graph);
 
     // initialize all nodes
     nodes.forEach((node) => node.initialize(state));
