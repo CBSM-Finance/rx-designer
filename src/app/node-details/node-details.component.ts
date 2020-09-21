@@ -1,4 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
+import { Designer } from '../designer/designer';
 import { DesignerNode, DesignerNodeInput } from '../nodes/designer-node';
 
 @Component({
@@ -8,6 +9,7 @@ import { DesignerNode, DesignerNodeInput } from '../nodes/designer-node';
 })
 export class NodeDetailsComponent implements OnInit {
   @Input() node: DesignerNode;
+  @Input() designer: Designer;
 
   constructor() { }
 
@@ -16,5 +18,9 @@ export class NodeDetailsComponent implements OnInit {
 
   updateInput(input: DesignerNodeInput, evt: Event) {
     input.value = (evt.target as HTMLInputElement).value;
+  }
+
+  removeNode() {
+    this.designer.removeNode(this.node);
   }
 }

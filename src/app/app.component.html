@@ -12,7 +12,7 @@
       <canvas></canvas>
       <canvas></canvas>
     </div>
-    <app-node-details *ngIf="designer && designer.selectedNode" [node]="designer?.selectedNode"></app-node-details>
+    <app-node-details *ngIf="designer && designer.selectedNode" [designer]="designer" [node]="designer?.selectedNode"></app-node-details>
   </div>
   <div fxLayout="row">
     <app-marbles></app-marbles>

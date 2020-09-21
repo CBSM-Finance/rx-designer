@@ -2,9 +2,7 @@ import { ReactiveGraph } from '@cbsm-finance/reactive-nodes';
 import {
   merge,
   of,
-  from,
   Subject,
-  Subscription,
   fromEvent,
   Observable,
   EMPTY, Subscriber
@@ -150,6 +148,16 @@ export class Designer {
     bgCanvas.style.backgroundColor = colors.bg;
     this.drawGrid(bgCanvas.getContext('2d'), bgCanvas);
 
+    this.reload();
+  }
+
+  public removeNode(node: DesignerNode): void {
+    if (this.selectedNode === node) {
+      this.selectedNode = void 0;
+    }
+    const index = this.graph.nodes.indexOf(node);
+    this.positions = this.positions.filter((pos, i) => i !== index);
+    this.graph.removeNode(node);
     this.reload();
   }
 
