@@ -18,13 +18,12 @@ export function coreGlue(designer: Designer, node: DesignerNode) {
 
       ctx.save();
       ctx.fillStyle = 'rgba(232, 232, 232, .8)';
-      // ctx.fillStyle = '#EFEFEF';
       ctx.shadowColor = '#dadada';
 
       if (designer.selectedNode === node) {
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 1;
         ctx.shadowBlur = 8;
-        ctx.strokeStyle = '#b8b8f8';
+        ctx.strokeStyle = '#000678';
       } else {
         ctx.shadowBlur = gl.props.hover ? 8 : 0;
         ctx.strokeStyle = '#b8b8b8';
@@ -33,8 +32,8 @@ export function coreGlue(designer: Designer, node: DesignerNode) {
       ctx.beginPath();
       roundedRect(ctx, pos.x, pos.y + .5, dim.x, dim.y, designerVars.cellSize);
       ctx.closePath();
-      ctx.stroke();
       ctx.fill();
+      ctx.stroke();
       ctx.restore();
     },
   });
