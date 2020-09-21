@@ -1,5 +1,5 @@
 import { DesignerNode } from '../designer-node';
-import { tap, switchMap } from 'rxjs/operators';
+import { tap, switchMap, filter } from 'rxjs/operators';
 import { combineLatest, Observable } from 'rxjs';
 import { ElectronCommunicationService } from 'src/app/electron-communication.service';
 import { LoggerService } from 'src/app/logger.service';
@@ -53,6 +53,10 @@ export class RequestMktDataNode extends DesignerNode {
         },
       }, true)),
       tap(response => console.log('GOT RESPONSE!', response)),
+      switchMap(({ tickerId }) => electron.on('ib', 'message').pipe(
+        filter(msg => msg.tickerId === tickerId && msg.type === 'tickprice'),
+        tap(msg => console.log(tickerId, msg)),
+      )),
     );
 
     return [mktData];
