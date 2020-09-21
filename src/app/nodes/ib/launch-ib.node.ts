@@ -1,5 +1,5 @@
 import { DesignerNode, DesignerNodeArgType } from '../designer-node';
-import { share, switchMapTo, tap } from 'rxjs/operators';
+import { first, share, switchMap, switchMapTo, tap } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import { ElectronCommunicationService } from 'src/app/electron-communication.service';
 import { LoggerService } from 'src/app/logger.service';
@@ -23,13 +23,13 @@ export class LaunchIBNode extends DesignerNode {
     const electron = this.state.get('electron') as ElectronCommunicationService;
     const logger = this.state.get('logger') as LoggerService;
     const launched = of(true).pipe(
-      tap(() => electron.send('ib', 'launch')),
-      switchMapTo(electron.on('ib', 'launched')),
+      switchMap(() => electron.send('ib', 'launch', {}, true)),
       logger.log((msg) => ({
         level: 'info',
         node: this.title,
         msg,
       })),
+      first(),
       share()
     );
     return [launched];

@@ -16,17 +16,22 @@ export function handleEvents(mainWindow: any) {
 
   const localCommands = ['launch'];
 
-  on('ib', cmd => !localCommands.includes(cmd), data => client.send({
+  on('ib', cmd => !localCommands.includes(cmd), (data) => client.send({
     type: data.command,
+    respondCommand: data.respondCommand,
     ...data.payload,
   }));
 
-  on('ib', 'launch', async () => {
+  on('ib', 'launch', async (data) => {
     client.launch();
-    send('ib', 'launched');
 
     subs.sink = client.inMessages
-      .pipe(tap((msg) => send('ib', 'message', msg)))
+      .pipe(
+        tap((msg) => {
+          console.log('got message', msg);
+          send('ib', (msg as any).respondCommand ?? 'message', msg);
+        }),
+      )
       .subscribe();
 
     subs.sink = client.errors
@@ -35,6 +40,8 @@ export function handleEvents(mainWindow: any) {
         msg: err,
       })))
       .subscribe();
+
+    send('ib', data.respondCommand);
   });
 
   // on('ib', 'connect tws', async () => {
@@ -60,21 +67,21 @@ export function on(
 ) {
   return ipcMain.on(channel, async (event: any, data: any) => {
     if (!isCommand(command, data.command)) return;
-    const respondCommand = `${command}_response`;
 
     try {
       await callback(data);
 
-      event.reply(channel, {
-        command: respondCommand,
-        success: true,
-      });
+      // event.reply(channel, {
+      //   command: respondCommand,
+      //   success: true,
+      // });
     } catch (e) {
-      event.reply(channel, {
-        command: respondCommand,
-        success: false,
-        e,
-      });
+      throw e;
+      // event.reply(channel, {
+      //   command: respondCommand,
+      //   success: false,
+      //   e,
+      // });
     }
   });
 }

@@ -7,9 +7,9 @@ import {
   Subscription,
   fromEvent,
   Observable,
-  EMPTY,
+  EMPTY, Subscriber
 } from 'rxjs';
-import { tap, takeUntil, switchMapTo, share, observeOn } from 'rxjs/operators';
+import { tap, takeUntil, switchMapTo, share, observeOn, takeWhile } from 'rxjs/operators';
 import { DragHandler, Glue, glue, subtract, MouseEventHandler } from '../glue';
 import { objToNode, nodeToObj } from './obj-to-node';
 import { inPortGlue } from './glues/in-port';
@@ -29,7 +29,7 @@ const colors = {
   grid: '#e2e2e4',
   ports: '#888',
   label: '#000',
-  connections: '#aaa',
+  connections: '#6a6ff2',
   dragConnection: '#aaa',
 };
 
@@ -97,7 +97,7 @@ export class Designer {
     this.reload();
   }
 
-  run(initState: any): Subscription {
+  run(initState: any): () => void {
     const state = new State(initState);
     const { nodes } = this.graph;
 
@@ -111,7 +111,15 @@ export class Designer {
     this.ms.reset();
     this.logger.reset();
 
-    return this.graph.execute(lastNode, 0).subscribe(
+
+    let killerObserver: Subscriber<any>;
+    const killerObservable = new Observable(observer => {
+      killerObserver = observer;
+    });
+
+    this.graph.execute(lastNode, 0).pipe(
+      takeUntil(killerObservable),
+    ).subscribe(
       () => {},
       (err) => {
         console.log('err', err);
@@ -120,10 +128,14 @@ export class Designer {
         nodes.forEach((node) => node.kill());
       },
       () => {
+        console.log('COMPLETE');
+
         // kill all nodes
         nodes.forEach((node) => node.kill());
       }
     );
+
+    return () => killerObserver.next(void 0);
   }
 
   constructor(

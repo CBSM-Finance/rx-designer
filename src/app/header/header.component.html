@@ -2,8 +2,11 @@
   <div class="btn" (click)="save()">
     <mat-icon>save</mat-icon>
   </div>
-  <div class="btn" (click)="run()">
-    <mat-icon>play_arrow</mat-icon>
+  <div class="btn" *ngIf="!running" (click)="run()">
+    <mat-icon fontSet="material-icons-outlined">play_arrow</mat-icon>
+  </div>
+  <div class="btn active" *ngIf="running" (click)="stop()">
+    <mat-icon>pause</mat-icon>
   </div>
 </div>
 

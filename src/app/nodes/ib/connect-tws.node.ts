@@ -64,4 +64,9 @@ export class ConnectTWSNode extends DesignerNode {
     );
     return [connected, disconnected];
   }
+
+  kill() {
+    const electron = this.state.get('electron') as ElectronCommunicationService;
+    electron.send('ib', 'disconnect');
+  }
 }

@@ -1,57 +1,60 @@
-// import { DesignerNode, DesignerNodeArg, DesignerNodeArgType } from '../designer-node';
-// import { share, switchMapTo, tap } from 'rxjs/operators';
-// import { of } from 'rxjs';
-// import { State } from 'src/app/state';
-// import { ElectronCommunicationService } from 'src/app/electron-communication.service';
-// import { LoggerService } from 'src/app/logger.service';
+import { DesignerNode } from '../designer-node';
+import { tap, switchMap } from 'rxjs/operators';
+import { combineLatest, Observable } from 'rxjs';
+import { ElectronCommunicationService } from 'src/app/electron-communication.service';
+import { LoggerService } from 'src/app/logger.service';
 
-// export class RequestMktDataNode extends DesignerNode {
-//   static TITLE = 'Request Mkt Data';
-//   static LOCAL_ID = 'reqMktData';
+export class RequestMktDataNode extends DesignerNode {
+  static TITLE = 'Request Market Data';
+  static LOCAL_ID = 'reqMktData';
+  static GROUP_ID = 'ib';
 
-//   state: State;
-//   args: DesignerNodeArg[] = [
-//     {
-//       name: 'URL',
-//       type: DesignerNodeArgType.STRING,
-//       required: false,
-//       description: 'The JSON file path.',
-//     }
-//   ];
+  description = `Request market data.`;
 
-//   description = `
-//     Emits whenever TWS is connected.
-//   `;
+  inputs = [
+    {
+      name: 'Impulse',
+    },
+    {
+      name: 'Symbol',
+      value: 'UVXY',
+    },
+    {
+      name: 'Currency',
+      value: 'USD',
+    },
+    {
+      name: 'Exchange',
+      value: 'SMART',
+    },
+    {
+      name: 'Security Type',
+      value: 'STK',
+    },
+  ];
 
-//   operator() {
-//     const electron = this.state.get('electron') as ElectronCommunicationService;
-//     const logger = this.state.get('logger') as LoggerService;
+  outputs = [
+    {
+      name: 'Market Data',
+    },
+  ];
 
-//     const contract = {
-//       // multiplier;
-//       // localSymbol;
-//       exchange: 'ISLAND',
-//       // primaryExch: '',
-//       symbol: 'IBKR',
-//       secType: 'STK',
-//       currency: 'USD',
-//     };
+  connect(inputs: Observable<any>[]): Observable<any>[] {
+    const electron = this.state.get('electron') as ElectronCommunicationService;
+    const logger = this.state.get('logger') as LoggerService;
 
-//     return of(true).pipe(
-//       tap(() => electron.send('ib', 'launch')),
-//       switchMapTo(electron.on('ib', 'launched')),
-//       logger.log(msg => ({
-//         level: 'info',
-//         node: this.title,
-//         msg,
-//       })),
-//       share(),
-//     );
-//   }
+    const mktData = combineLatest(inputs).pipe(
+      switchMap(([, symbol, currency, exchange, secType]) => electron.send('ib', 'reqmktdata', {
+        contract: {
+          symbol,
+          currency,
+          exchange,
+          secType,
+        },
+      }, true)),
+      tap(response => console.log('GOT RESPONSE!', response)),
+    );
 
-//   connect(state: State) {
-//     this.state = state;
-//   }
-
-//   disconnect() { }
-// }
+    return [mktData];
+  }
+}

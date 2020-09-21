@@ -16,7 +16,6 @@ export function outPortGlue(
     wPc: 1,
     hPc: 1,
     yPx: y,
-    // yPx: -((count - 1) * d) / 2 + d * i + parentHeight / 2 - height / 2,
     label: 'out-port',
     customPaint: (gl, ctx: CanvasRenderingContext2D) => {
       const { pos, dim } = gl.cache;
@@ -27,7 +26,7 @@ export function outPortGlue(
       ctx.fillStyle = '#000';
       ctx.textBaseline = 'middle';
       ctx.textAlign = 'right';
-      ctx.font = 'medium 6pt Roboto';
+      ctx.font = '500 6pt Roboto';
       ctx.fillText(output.name, pos.x - 2 * cellSize, pos.y + cellSize / 2);
       ctx.closePath();
 

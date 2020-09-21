@@ -1,18 +1,28 @@
 import { Injectable } from '@angular/core';
 import { ElectronService } from 'ngx-electron';
-import { Observable } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ElectronCommunicationService {
-  send(channel: string, command: string, payload?: any) {
-    console.log(`send [${channel}]`, { command, payload });
+  private msgId = 0;
+
+  send(channel: string, command: string, payload?: any, expectResponse = false): Observable<any> {
+    const respondCommand = `${command}_response_${++this.msgId}`;
+    console.log(`send [${channel}]`, { command, payload, respondCommand });
     const data = {
       command,
       payload,
+      respondCommand,
     };
     setTimeout(() => this.es.ipcRenderer.send(channel, data), 0);
+
+    if (!expectResponse) return EMPTY;
+    return this.on(channel, respondCommand).pipe(
+      first(),
+    );
   }
 
   on(channel: string, command: string): Observable<any> {

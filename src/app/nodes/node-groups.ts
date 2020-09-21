@@ -8,6 +8,7 @@ import { IsEvenNode } from './is-even.node';
 import { LaunchIBNode } from './ib/launch-ib.node';
 import { ConnectTWSNode } from './ib/connect-tws.node';
 import { IfNode } from './math/if.node';
+import { RequestMktDataNode } from './ib/request-mkt-data.node';
 
 export const nodeGroups: NodeGroup[] = [
   {
@@ -26,7 +27,7 @@ export const nodeGroups: NodeGroup[] = [
     title: 'Interactive Brokers',
     id: 'ib',
     color: '#D81222',
-    nodes: [ConnectTWSNode, LaunchIBNode],
+    nodes: [ConnectTWSNode, LaunchIBNode, RequestMktDataNode],
   },
 ];
 
