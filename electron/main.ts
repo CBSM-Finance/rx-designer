@@ -19,9 +19,7 @@ function createWindow() {
     },
   });
 
-  mainWindow.webContents.on('did-finish-load', () => {
-    handleEvents(mainWindow);
-  });
+  mainWindow.webContents.on('did-finish-load', () => handleEvents());
 
   mainWindow.loadURL(
     url.format({
