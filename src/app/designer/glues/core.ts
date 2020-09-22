@@ -17,7 +17,6 @@ export function coreGlue(designer: Designer, node: DesignerNode) {
 
       ctx.save();
       ctx.fillStyle = 'rgba(255, 255, 255, .9)';
-      // ctx.fillStyle = 'rgba(232, 232, 232, .8)';
       ctx.shadowColor = '#dadada';
 
       if (designer.selectedNode === node) {
@@ -28,11 +27,10 @@ export function coreGlue(designer: Designer, node: DesignerNode) {
         ctx.lineWidth = .5;
         ctx.shadowBlur = gl.props.hover ? 8 : 0;
         ctx.strokeStyle = '#ccc';
-        // ctx.strokeStyle = '#b8b8b8';
       }
 
       ctx.beginPath();
-      roundedRect(ctx, pos.x, pos.y + .5, dim.x, dim.y, designerVars.cellSize);
+      roundedRect(ctx, pos.x, pos.y + .5, dim.x, dim.y, designerVars.adjCellSize());
       ctx.closePath();
       ctx.fill('evenodd');
       ctx.stroke();

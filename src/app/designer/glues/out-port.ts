@@ -10,7 +10,7 @@ export function outPortGlue(
   node: DesignerNode,
   graph: ReactiveGraph<DesignerNode>,
 ) {
-  const cellSize = designerVars.cellSize;
+  const cellSize = designerVars.adjCellSize();
 
   return glue({
     wPc: 1,

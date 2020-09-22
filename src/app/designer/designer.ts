@@ -3,11 +3,10 @@ import {
   merge,
   of,
   Subject,
-  fromEvent,
   Observable,
   EMPTY, Subscriber
 } from 'rxjs';
-import { tap, takeUntil, switchMapTo, share, observeOn, takeWhile } from 'rxjs/operators';
+import { tap, takeUntil, switchMapTo, share, observeOn, takeWhile, filter } from 'rxjs/operators';
 import { DragHandler, Glue, glue, subtract, MouseEventHandler } from '../glue';
 import { objToNode, nodeToObj } from './obj-to-node';
 import { inPortGlue } from './glues/in-port';
@@ -19,7 +18,7 @@ import { State } from '../state';
 import { NodeBuilder } from '@cbsm-finance/reactive-nodes/dist/reactive-graph';
 import { MarblesService } from '../marbles/marbles.service';
 import { LoggerService } from '../logger.service';
-import { asapScheduler } from 'rxjs';
+import { asapScheduler, fromEvent } from 'rxjs';
 import { designerVars } from './designer-vars';
 import { connectedNodes } from '../marbles/connected-nodes';
 import { titleGlue } from './glues/title';
@@ -56,8 +55,8 @@ export const rxDesignerNodeBuilder = (ms: MarblesService): NodeBuilder => (
 };
 
 export class Designer {
-  gridSize = 16;
   selectedNode: DesignerNode = void 0;
+  adjustedPositions: number[][];
 
   private dh: DragHandler;
   private mh: MouseEventHandler;
@@ -87,6 +86,21 @@ export class Designer {
     return new Designer(graph, obj.positions, canvas, bgCanvas, ms, logger);
   }
 
+  zoom(factor = 0, mPos: { x: number, y: number } = void 0) {
+    const newZoomFactor = Math.max(designerVars.zoomFactor + factor, .2);
+    const delta = newZoomFactor - designerVars.zoomFactor;
+    designerVars.zoomFactor = newZoomFactor;
+    this.adjustedPositions = this.positions.map(([x, y]) => [x * designerVars.zoomFactor, y * designerVars.zoomFactor]);
+
+    if (mPos) {
+      designerVars.translate.x += -mPos.x * delta;
+      designerVars.translate.y += -mPos.y * delta;
+    }
+
+    this.reload();
+    this.drawGrid(this.bgCanvas.getContext('2d'), this.bgCanvas);
+  }
+
   save() {
     localStorage.setItem('graph', this.toJson());
   }
@@ -94,7 +108,7 @@ export class Designer {
   addNode(node: DesignerNode) {
     this.graph.addNode(node);
     this.positions.push([8, 8]);
-    this.reload();
+    this.zoom(0);
   }
 
   run(initState: any): () => void {
@@ -110,7 +124,6 @@ export class Designer {
 
     this.ms.reset();
     this.logger.reset();
-
 
     let killerObserver: Subscriber<any>;
     const killerObservable = new Observable(observer => {
@@ -146,6 +159,7 @@ export class Designer {
     private ms: MarblesService,
     private logger: LoggerService
   ) {
+    this.zoom(0);
     bgCanvas.style.backgroundColor = colors.bg;
     this.drawGrid(bgCanvas.getContext('2d'), bgCanvas);
 
@@ -159,7 +173,7 @@ export class Designer {
     const index = this.graph.nodes.indexOf(node);
     this.positions = this.positions.filter((pos, i) => i !== index);
     this.graph.removeNode(node);
-    this.reload();
+    this.zoom(0);
   }
 
   private toJson(): string {
@@ -176,8 +190,21 @@ export class Designer {
   private reload() {
     this.reset();
 
+    fromEvent(this.canvas, 'mousewheel').pipe(
+      filter((ev: WheelEvent) => ev.ctrlKey),
+      tap((ev: WheelEvent) => {
+        const rect = this.canvas.getBoundingClientRect();
+        const mPos = {
+          x: ev.pageX - rect.x,
+          y: ev.pageY - rect.y,
+        };
+        this.zoom(Math.sign(ev.deltaY) * -.02, mPos);
+      }),
+      takeUntil(this.unsub),
+    ).subscribe();
+
     this.glNodes = this.graph.nodes.map((node, i) =>
-      this.addItem(this.positions[i][0], this.positions[i][1], node)
+      this.addItem(this.adjustedPositions[i][0], this.adjustedPositions[i][1], node)
     );
     this.getConnections();
 
@@ -255,8 +282,8 @@ export class Designer {
             // update pos in source data
             const nodeIndex = this.glNodes.indexOf(glue);
             this.positions[nodeIndex] = [
-              props.xPx + props.xOffsetPx,
-              props.yPx + props.yOffsetPx,
+              props.xPx + props.xOffsetPx / designerVars.zoomFactor,
+              props.yPx + props.yOffsetPx / designerVars.zoomFactor,
             ];
           },
         },
@@ -316,6 +343,8 @@ export class Designer {
     this.canvas.width = this.canvas.clientWidth;
     this.canvas.height = this.canvas.clientHeight;
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    ctx.translate(designerVars.translate.x, designerVars.translate.y);
 
     const lines = this.connections.map(
       ({ source, target, inPort, outPort }) => {
@@ -425,9 +454,11 @@ export class Designer {
   private drawGrid(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
     const w = canvas.width;
     const h = canvas.height;
+    const gridSize = designerVars.adjCellSize() * 2;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    for (let y = 0; y < h; y += this.gridSize) {
-      for (let x = 0; x < w; x += this.gridSize) {
+    for (let y = 0; y < h; y += gridSize) {
+      for (let x = 0; x < w; x += gridSize) {
         ctx.beginPath();
         ctx.fillStyle = colors.grid;
         ctx.arc(x, y, 1, 0, Math.PI * 2);
@@ -438,15 +469,16 @@ export class Designer {
   }
 
   private addItem(x: number, y: number, node: DesignerNode): Glue {
+    const gridSize = designerVars.adjCellSize() * 2;
     const gl = glue(
       {
-        wPx: designerVars.cellSize * 14,
+        wPx: designerVars.adjCellSize() * 14,
         hPx:
-          designerVars.cellSize *
+          designerVars.adjCellSize() *
           ((node.inputCount() + node.outputCount()) * 2 + 3),
         xPx: x,
         yPx: y,
-        snapToGrid: this.gridSize,
+        snapToGrid: gridSize,
         color: 'transparent',
       },
       [
@@ -466,7 +498,7 @@ export class Designer {
 
   private getOutPorts(count: number, node: DesignerNode) {
     const items = [];
-    const cellSize = designerVars.cellSize;
+    const cellSize = designerVars.adjCellSize();
 
     const y = (node.inputCount() * 2 + 3) * cellSize;
 
@@ -487,7 +519,7 @@ export class Designer {
 
   private getInPorts(count: number, node: DesignerNode) {
     const items = [];
-    const cellSize = designerVars.cellSize;
+    const cellSize = designerVars.adjCellSize();
 
     for (let i = 0; i < count; i++) {
       const y = (i * 2 + 3) * cellSize;

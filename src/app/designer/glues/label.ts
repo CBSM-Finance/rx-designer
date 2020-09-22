@@ -3,7 +3,7 @@ import { DesignerNode } from 'src/app/nodes/designer-node';
 import { designerVars } from '../designer-vars';
 
 export function labelGlue(node: DesignerNode, colors: any) {
-  const cellSize = designerVars.cellSize;
+  const cellSize = designerVars.adjCellSize();
   return glue({
     xPx: 0,
     yPx: -cellSize * 3,

@@ -6,7 +6,7 @@ import { roundedRect } from '../paint/rounded-rect';
 
 export function titleGlue(node: DesignerNode) {
   const group = getGroup(node);
-  const cellSize = designerVars.cellSize;
+  const cellSize = designerVars.adjCellSize();
 
   return glue({
     xPx: 0,
