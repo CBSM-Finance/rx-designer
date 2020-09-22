@@ -31,7 +31,7 @@ export function titleGlue(node: DesignerNode) {
       ctx.beginPath();
       ctx.textAlign = 'left';
       ctx.fillStyle = '#000';
-      ctx.font = '500 6pt Roboto';
+      ctx.font = `500 ${6 * designerVars.zoomFactor}pt Roboto`;
       ctx.fillText(node.title, pos.x + cellSize, pos.y + cellSize);
       ctx.closePath();
     },

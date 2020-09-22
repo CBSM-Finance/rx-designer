@@ -1,6 +1,7 @@
 import { fromEvent, merge, Observable, Subject, ReplaySubject } from 'rxjs';
 import { tap, map, filter, mapTo, switchMap, takeUntil } from 'rxjs/operators';
 import * as math from 'mathjs';
+import { designerVars } from './designer/designer-vars';
 
 export interface GlueProps {
   wPx: number;
@@ -286,9 +287,10 @@ export class DragHandler {
       .pipe(
         map((ev: any) => {
           const rect = canvas.getBoundingClientRect();
+          const { translate } = designerVars;
           return {
-            x: ev.pageX - rect.x,
-            y: ev.pageY - rect.y,
+            x: ev.pageX - rect.x - translate.x,
+            y: ev.pageY - rect.y - translate.y,
           };
         }),
         tap(({ x, y }) => {
@@ -323,9 +325,10 @@ export class DragHandler {
         filter(() => Boolean(this.dragger)),
         map((ev: any) => {
           const rect = canvas.getBoundingClientRect();
+          const { translate } = designerVars;
           return {
-            x: ev.pageX - rect.x,
-            y: ev.pageY - rect.y,
+            x: ev.pageX - rect.x - translate.x,
+            y: ev.pageY - rect.y - translate.y,
           };
         }),
         map((mPos) => subtract(mPos, this.dragMouseStartPos)),

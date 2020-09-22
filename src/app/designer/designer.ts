@@ -22,6 +22,7 @@ import { asapScheduler, fromEvent } from 'rxjs';
 import { designerVars } from './designer-vars';
 import { connectedNodes } from '../marbles/connected-nodes';
 import { titleGlue } from './glues/title';
+import { ConsoleReporter } from 'jasmine';
 
 const colors = {
   bg: '#fff',
@@ -87,14 +88,16 @@ export class Designer {
   }
 
   zoom(factor = 0, mPos: { x: number, y: number } = void 0) {
-    const newZoomFactor = Math.max(designerVars.zoomFactor + factor, .2);
+    const newZoomFactor = Math.min(Math.max(designerVars.zoomFactor + factor, .6), 1.4);
     const delta = newZoomFactor - designerVars.zoomFactor;
     designerVars.zoomFactor = newZoomFactor;
+
     this.adjustedPositions = this.positions.map(([x, y]) => [x * designerVars.zoomFactor, y * designerVars.zoomFactor]);
 
     if (mPos) {
-      designerVars.translate.x += -mPos.x * delta;
-      designerVars.translate.y += -mPos.y * delta;
+      const { translate } = designerVars;
+      translate.x = Math.min(translate.x - mPos.x * delta, 0);
+      translate.y = Math.min(translate.y - mPos.y * delta, 0);
     }
 
     this.reload();
@@ -213,8 +216,9 @@ export class Designer {
       this.mh.register(core, {
         onMove: (ev: MouseEvent) => {
           const rect = this.canvas.getBoundingClientRect();
+          const { translate } = designerVars;
           return (core.props.hover =
-            core.intersect(ev.pageX - rect.x, ev.pageY - rect.y).length > 0);
+            core.intersect(ev.pageX - rect.x - translate.x, ev.pageY - rect.y - translate.y).length > 0);
         },
       });
 
@@ -224,8 +228,9 @@ export class Designer {
           this.mh.register(port, {
             onMove: (ev: MouseEvent) => {
               const rect = this.canvas.getBoundingClientRect();
+              const { translate } = designerVars;
               return (port.props.hover =
-                port.intersect(ev.pageX - rect.x, ev.pageY - rect.y).length >
+                port.intersect(ev.pageX - rect.x - translate.x, ev.pageY - rect.y - translate.y).length >
                 0);
             },
           });
@@ -244,11 +249,12 @@ export class Designer {
             this.glNodes.find((g, h) => {
               if (g === gl) return false;
               const rect = this.canvas.getBoundingClientRect();
+              const { translate } = designerVars;
               const inPort = g
                 .query('in-port')
                 .findIndex(
                   (p) =>
-                    p.intersect(event.pageX - rect.x, event.pageY - rect.y)
+                    p.intersect(event.pageX - rect.x - translate.x, event.pageY - rect.y - translate.y)
                       .length > 0
                 );
               if (inPort === -1) return false;
@@ -282,8 +288,8 @@ export class Designer {
             // update pos in source data
             const nodeIndex = this.glNodes.indexOf(glue);
             this.positions[nodeIndex] = [
-              props.xPx + props.xOffsetPx / designerVars.zoomFactor,
-              props.yPx + props.yOffsetPx / designerVars.zoomFactor,
+              (props.xPx + props.xOffsetPx) / designerVars.zoomFactor,
+              (props.yPx + props.yOffsetPx) / designerVars.zoomFactor,
             ];
           },
         },
@@ -337,55 +343,23 @@ export class Designer {
     this.mh = new MouseEventHandler(this.canvas);
   }
 
+  private resizeCanvas(ctx: CanvasRenderingContext2D): void {
+    const ratio = 1;
+    const { canvas } = this;
+    canvas.width = canvas.clientWidth * ratio;
+    canvas.height = canvas.clientHeight * ratio;
+    canvas.style.width = canvas.clientWidth + 'px';
+    canvas.style.height = canvas.clientHeight + 'px';
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+  }
+
   private repaint() {
     const ctx = this.canvas.getContext('2d');
 
-    this.canvas.width = this.canvas.clientWidth;
-    this.canvas.height = this.canvas.clientHeight;
+    this.resizeCanvas(ctx);
+
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
     ctx.translate(designerVars.translate.x, designerVars.translate.y);
-
-    const lines = this.connections.map(
-      ({ source, target, inPort, outPort }) => {
-        const a = this.glNodes[source].query('out-port')[outPort].centerRight();
-        const b = this.glNodes[target].query('in-port')[inPort].centerLeft();
-        const dim = subtract(b, a);
-        return glue({
-          xPx: a.x,
-          yPx: a.y,
-          wPx: dim.x,
-          hPx: dim.y,
-          asLine: true,
-          color: colors.connections,
-          customPaint: (gl, ctx) => {
-            const { pos, dim } = gl.cache;
-            const offset = 2;
-            ctx.beginPath();
-            ctx.strokeStyle = gl.props.color || 'white';
-            ctx.lineWidth = 2;
-            ctx.moveTo(pos.x + offset, pos.y);
-            const toX = pos.x + dim.x - offset;
-            const toY = pos.y + dim.y;
-            const delta = Math.sqrt(
-              Math.pow(pos.x - toX, 2) + Math.pow(pos.y - toY, 2)
-            );
-            const smoothing = delta * 0.1;
-            ctx.bezierCurveTo(
-              pos.x + smoothing + offset,
-              pos.y,
-              toX - smoothing,
-              toY,
-              toX,
-              toY
-            );
-            ctx.stroke();
-            ctx.closePath();
-          },
-        });
-      }
-    );
-    lines.forEach((g) => g.paint(this.canvas));
 
     if (this.dragConnection) {
       glue({
@@ -426,6 +400,47 @@ export class Designer {
     }
 
     this.glNodes.forEach((g) => g.paint(this.canvas));
+
+    const lines = this.connections.map(
+      ({ source, target, inPort, outPort }) => {
+        const a = this.glNodes[source].query('out-port')[outPort].centerRight();
+        const b = this.glNodes[target].query('in-port')[inPort].centerLeft();
+        const dim = subtract(b, a);
+        return glue({
+          xPx: a.x,
+          yPx: a.y,
+          wPx: dim.x,
+          hPx: dim.y,
+          asLine: true,
+          color: colors.connections,
+          customPaint: (gl, ctx) => {
+            const { pos, dim } = gl.cache;
+            const offset = 2;
+            ctx.beginPath();
+            ctx.strokeStyle = gl.props.color || 'white';
+            ctx.lineWidth = 2 * designerVars.zoomFactor;
+            ctx.moveTo(pos.x + offset, pos.y);
+            const toX = pos.x + dim.x - offset;
+            const toY = pos.y + dim.y;
+            const delta = Math.sqrt(
+              Math.pow(pos.x - toX, 2) + Math.pow(pos.y - toY, 2)
+            );
+            const smoothing = delta * 0.1;
+            ctx.bezierCurveTo(
+              pos.x + smoothing + offset,
+              pos.y,
+              toX - smoothing,
+              toY,
+              toX,
+              toY
+            );
+            ctx.stroke();
+            ctx.closePath();
+          },
+        });
+      }
+    );
+    lines.forEach((g) => g.paint(this.canvas));
   }
 
   private getConnections(): {
@@ -456,12 +471,14 @@ export class Designer {
     const h = canvas.height;
     const gridSize = designerVars.adjCellSize() * 2;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const translateX = designerVars.translate.x % gridSize;
+    const translateY = designerVars.translate.y % gridSize;
 
-    for (let y = 0; y < h; y += gridSize) {
-      for (let x = 0; x < w; x += gridSize) {
+    for (let y = translateY; y < h; y += gridSize) {
+      for (let x = translateX; x < w; x += gridSize) {
         ctx.beginPath();
         ctx.fillStyle = colors.grid;
-        ctx.arc(x, y, 1, 0, Math.PI * 2);
+        ctx.arc(x, y, 1 * designerVars.zoomFactor, 0, Math.PI * 2);
         ctx.fill();
         ctx.closePath();
       }
@@ -553,4 +570,16 @@ export interface MktData {
   low: number;
   bid: number;
   ask: number;
+}
+
+function pixelRatio() {
+  const ctx = document.createElement('canvas').getContext('2d') as any;
+  const dpr = window.devicePixelRatio || 1;
+  const bsr = ctx.webkitBackingStorePixelRatio ||
+    ctx.mozBackingStorePixelRatio ||
+    ctx.msBackingStorePixelRatio ||
+    ctx.oBackingStorePixelRatio ||
+    ctx.backingStorePixelRatio || 1;
+
+  return dpr / bsr;
 }

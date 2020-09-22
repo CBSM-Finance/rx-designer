@@ -20,12 +20,12 @@ export function coreGlue(designer: Designer, node: DesignerNode) {
       ctx.shadowColor = '#dadada';
 
       if (designer.selectedNode === node) {
-        ctx.lineWidth = 1;
-        ctx.shadowBlur = 8;
+        ctx.lineWidth = 1 * designerVars.zoomFactor;
+        ctx.shadowBlur = 8 * designerVars.zoomFactor;
         ctx.strokeStyle = '#000678';
       } else {
-        ctx.lineWidth = .5;
-        ctx.shadowBlur = gl.props.hover ? 8 : 0;
+        ctx.lineWidth = 1 * designerVars.zoomFactor;
+        ctx.shadowBlur = (gl.props.hover ? 8 : 0) * designerVars.zoomFactor;
         ctx.strokeStyle = '#ccc';
       }
 

@@ -15,7 +15,7 @@ export function labelGlue(node: DesignerNode, colors: any) {
       ctx.beginPath();
       ctx.textAlign = 'center';
       ctx.fillStyle = colors.label;
-      ctx.font = '500 8pt Roboto';
+      ctx.font = `500 ${8 * designerVars.zoomFactor}pt Roboto`;
       ctx.fillText(node.label, pos.x, pos.y);
       ctx.closePath();
     },

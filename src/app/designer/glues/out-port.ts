@@ -27,7 +27,7 @@ export function outPortGlue(
       ctx.fillStyle = '#000';
       ctx.textBaseline = 'middle';
       ctx.textAlign = 'right';
-      ctx.font = '500 6pt Roboto';
+      ctx.font = `500 ${6 * designerVars.zoomFactor}pt Roboto`;
       ctx.fillText(output.name, pos.x - 2 * cellSize, pos.y + cellSize / 2);
       ctx.closePath();
 
@@ -37,20 +37,6 @@ export function outPortGlue(
       ctx.arc(pos.x + cellSize / 2, pos.y + cellSize / 2, cellSize / 2, 0, Math.PI * 2);
       ctx.fill();
       ctx.closePath();
-
-      // paintArrow(ctx, pos, dim);
-      // const conn = graph.outgoingNodes(node, i).length > 0;
-
-      // if (conn) {
-      //   ctx.strokeStyle = colors.connections;
-      // } else {
-      //   ctx.strokeStyle = gl.props.hover ? '#fff' : '#aaa';
-      // }
-
-      // paintArrow(ctx, pos, dim);
-
-      // ctx.lineWidth = 2;
-      // ctx.stroke();
     },
   });
 }

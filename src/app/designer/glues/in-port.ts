@@ -26,15 +26,13 @@ export function inPortGlue(
 
       // label
       ctx.beginPath();
-
       ctx.fillStyle = '#000';
       ctx.textBaseline = 'middle';
       ctx.textAlign = 'left';
-      ctx.font = '500 6pt Roboto';
+      ctx.font = `500 ${6 * designerVars.zoomFactor}pt Roboto`;
       ctx.fillText(input.name, pos.x + 2 * cellSize, pos.y + cellSize / 2);
       ctx.closePath();
 
-      // ctx.beginPath();
       if (conn) {
         if (gl.props.hover) {
           ctx.strokeStyle = '#6a6ff2';
@@ -55,22 +53,6 @@ export function inPortGlue(
         ctx.stroke();
         ctx.closePath();
       }
-
-      // if (conn && gl.props.hover) {
-      //   paintX(ctx, pos, dim);
-      // } else {
-      //   ctx.arc(
-      //     pos.x + dim.x / 2,
-      //     pos.y + dim.y / 2,
-      //     dim.x / 2 - 2,
-      //     0,
-      //     Math.PI * 2
-      //   );
-      // }
-
-      // ctx.lineWidth = 2;
-      // ctx.stroke();
-      // ctx.closePath();
     },
   });
 }
