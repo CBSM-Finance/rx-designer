@@ -18,14 +18,16 @@ export function titleGlue(node: DesignerNode) {
       const centerPos = gl.center();
 
       ctx.beginPath();
-      const grd = ctx.createLinearGradient(centerPos.x, pos.y, centerPos.x, pos.y + dim.y);
-      grd.addColorStop(0, '#fff');
-      grd.addColorStop(1, group.color);
-      ctx.fillStyle = grd;
+      // const grd = ctx.createLinearGradient(centerPos.x, pos.y, centerPos.x, pos.y + dim.y);
+      // grd.addColorStop(0, '#fff');
+      // grd.addColorStop(1, group.color);
+      // ctx.fillStyle = grd;
+      ctx.fillStyle = '#f2f2f2';
 
       const p = 1;
-      roundedRect(ctx, pos.x + p, pos.y + p, dim.x - p * 2, dim.y - p * 2, cellSize);
-      ctx.fill();
+      ctx.fillRect(pos.x + p, pos.y + p, dim.x - p * 2, dim.y - p * 2);
+      // roundedRect(ctx, pos.x + p, pos.y + p, dim.x - p * 2, dim.y - p * 2, cellSize);
+      // ctx.fill();
       ctx.closePath();
 
       ctx.beginPath();

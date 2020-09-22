@@ -1,4 +1,7 @@
-<header>Node Repository</header>
+<!-- <header>Node Repository</header> -->
+<div class="search">
+  <input type="text" #label placeholder="Search Nodes">
+</div>
 <div class="group" [class.show]="showGroup(group)" *ngFor="let group of nodeGroups">
   <div fxLayout="row" fxLayoutAlign="center center" class="group-title"
     (click)="toggle(group)">

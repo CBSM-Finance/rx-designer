@@ -7,13 +7,39 @@
 
   header {
     height: 28px;
-    border-bottom: 1px solid rgba(0, 0, 0, .08);
     padding: 0 16px;
     line-height: 28px;
     font-size: 9pt;
     letter-spacing: .1px;
     font-weight: 500;
-    margin-bottom: 4px;
+    margin: 4px 0;
+  }
+
+  .search {
+    padding: 0 16px;
+    margin: 8px 0;
+
+    input {
+      flex-direction: row;
+      background: #eee;
+      border-radius: 4px;
+      width: 100%;
+      border: none;
+      color: #000;
+      padding: 0 8px;
+      height: 32px;
+      line-height: 32px;
+      outline: none;
+      font-size: 9pt;
+      box-sizing: border-box;
+      outline: none;
+
+      &:focus {
+        background: #f6f6f6;
+        // box-shadow: 0 0 0px 2px rgba(0,20,180,.4), 0 0 0px 8px rgba(0,20,124,.02);
+        outline: none;
+      }
+    }
   }
 
   .group {

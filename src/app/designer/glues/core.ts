@@ -16,7 +16,8 @@ export function coreGlue(designer: Designer, node: DesignerNode) {
       const { pos, dim } = gl.cache;
 
       ctx.save();
-      ctx.fillStyle = 'rgba(255, 255, 255, .9)';
+      ctx.fillStyle = '#fff';
+      // ctx.fillStyle = 'rgba(255, 255, 255, .9)';
       ctx.shadowColor = '#dadada';
 
       if (designer.selectedNode === node) {
@@ -30,6 +31,8 @@ export function coreGlue(designer: Designer, node: DesignerNode) {
       }
 
       ctx.beginPath();
+      // ctx.fillRect(pos.x, pos.y + .5, dim.x, dim.y);
+      // ctx.strokeRect(pos.x, pos.y + .5, dim.x, dim.y);
       roundedRect(ctx, pos.x, pos.y + .5, dim.x, dim.y, designerVars.adjCellSize());
       ctx.closePath();
       ctx.fill('evenodd');

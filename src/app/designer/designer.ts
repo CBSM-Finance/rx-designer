@@ -22,14 +22,14 @@ import { asapScheduler, fromEvent } from 'rxjs';
 import { designerVars } from './designer-vars';
 import { connectedNodes } from '../marbles/connected-nodes';
 import { titleGlue } from './glues/title';
-import { ConsoleReporter } from 'jasmine';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 
 const colors = {
   bg: '#fff',
   grid: '#e2e2e4',
   ports: '#888',
   label: '#000',
-  connections: '#6a6ff2',
+  connections: 'rgba(0,0,180,.2)',
   dragConnection: '#aaa',
 };
 
@@ -201,7 +201,7 @@ export class Designer {
           x: ev.pageX - rect.x,
           y: ev.pageY - rect.y,
         };
-        this.zoom(Math.sign(ev.deltaY) * -.02, mPos);
+        this.zoom(Math.sign(ev.deltaY) * -.04, mPos);
       }),
       takeUntil(this.unsub),
     ).subscribe();
@@ -344,12 +344,10 @@ export class Designer {
   }
 
   private resizeCanvas(ctx: CanvasRenderingContext2D): void {
-    const ratio = 1;
+    const ratio = pixelRatio();
     const { canvas } = this;
     canvas.width = canvas.clientWidth * ratio;
     canvas.height = canvas.clientHeight * ratio;
-    canvas.style.width = canvas.clientWidth + 'px';
-    canvas.style.height = canvas.clientHeight + 'px';
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
   }
 
