@@ -10,6 +10,7 @@ import { ConnectTWSNode } from './ib/connect-tws.node';
 import { IfNode } from './math/if.node';
 import { RequestMktDataNode } from './ib/request-mkt-data.node';
 import { CronSchedulerNode } from './scheduling/cron-scheduler.node';
+import { ContractNode } from './ib/contract.node';
 
 export const nodeGroups: NodeGroup[] = [
   {
@@ -31,7 +32,7 @@ export const nodeGroups: NodeGroup[] = [
     id: 'ib',
     color: '#D81222',
     icon: 'analytics',
-    nodes: [ConnectTWSNode, LaunchIBNode, RequestMktDataNode],
+    nodes: [ConnectTWSNode, LaunchIBNode, RequestMktDataNode, ContractNode],
   },
   {
     title: 'Scheduling',
@@ -41,6 +42,10 @@ export const nodeGroups: NodeGroup[] = [
     nodes: [CronSchedulerNode],
   },
 ];
+
+export function getGroup(node: DesignerNode): NodeGroup {
+  return nodeGroups.find(group => group.id === node.groupId);
+}
 
 export interface NodeGroup {
   readonly title: string;

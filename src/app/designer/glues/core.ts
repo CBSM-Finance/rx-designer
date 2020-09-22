@@ -5,7 +5,6 @@ import { DesignerNode } from 'src/app/nodes/designer-node';
 import { designerVars } from '../designer-vars';
 
 export function coreGlue(designer: Designer, node: DesignerNode) {
-  const s = designerVars.cellSize * 14;
   return glue({
     anchor: 'topLeft',
     xPx: 0,
@@ -17,7 +16,8 @@ export function coreGlue(designer: Designer, node: DesignerNode) {
       const { pos, dim } = gl.cache;
 
       ctx.save();
-      ctx.fillStyle = 'rgba(232, 232, 232, .8)';
+      ctx.fillStyle = 'rgba(255, 255, 255, .9)';
+      // ctx.fillStyle = 'rgba(232, 232, 232, .8)';
       ctx.shadowColor = '#dadada';
 
       if (designer.selectedNode === node) {
@@ -25,14 +25,16 @@ export function coreGlue(designer: Designer, node: DesignerNode) {
         ctx.shadowBlur = 8;
         ctx.strokeStyle = '#000678';
       } else {
+        ctx.lineWidth = .5;
         ctx.shadowBlur = gl.props.hover ? 8 : 0;
-        ctx.strokeStyle = '#b8b8b8';
+        ctx.strokeStyle = '#ccc';
+        // ctx.strokeStyle = '#b8b8b8';
       }
 
       ctx.beginPath();
       roundedRect(ctx, pos.x, pos.y + .5, dim.x, dim.y, designerVars.cellSize);
       ctx.closePath();
-      ctx.fill();
+      ctx.fill('evenodd');
       ctx.stroke();
       ctx.restore();
     },

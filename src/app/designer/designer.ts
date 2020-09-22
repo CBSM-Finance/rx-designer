@@ -22,6 +22,7 @@ import { LoggerService } from '../logger.service';
 import { asapScheduler } from 'rxjs';
 import { designerVars } from './designer-vars';
 import { connectedNodes } from '../marbles/connected-nodes';
+import { titleGlue } from './glues/title';
 
 const colors = {
   bg: '#fff',
@@ -138,7 +139,7 @@ export class Designer {
   }
 
   constructor(
-    private graph: ReactiveGraph<DesignerNode>,
+    public graph: ReactiveGraph<DesignerNode>,
     private positions: number[][],
     private canvas: HTMLCanvasElement,
     private bgCanvas: HTMLCanvasElement,
@@ -333,7 +334,7 @@ export class Designer {
             const offset = 2;
             ctx.beginPath();
             ctx.strokeStyle = gl.props.color || 'white';
-            ctx.lineWidth = 1;
+            ctx.lineWidth = 2;
             ctx.moveTo(pos.x + offset, pos.y);
             const toX = pos.x + dim.x - offset;
             const toY = pos.y + dim.y;
@@ -442,7 +443,7 @@ export class Designer {
         wPx: designerVars.cellSize * 14,
         hPx:
           designerVars.cellSize *
-          ((node.inputCount() + node.outputCount()) * 2 + 1),
+          ((node.inputCount() + node.outputCount()) * 2 + 3),
         xPx: x,
         yPx: y,
         snapToGrid: this.gridSize,
@@ -453,6 +454,7 @@ export class Designer {
         this.getInPorts(node.inputs.length, node),
         this.getOutPorts(node.outputs.length, node),
         this.getLabel(node),
+        this.getTitle(node),
       ]
     );
     return gl;
@@ -462,11 +464,15 @@ export class Designer {
     return labelGlue(node, colors);
   }
 
+  private getTitle(node: DesignerNode): Glue {
+    return titleGlue(node, colors);
+  }
+
   private getOutPorts(count: number, node: DesignerNode) {
     const items = [];
     const cellSize = designerVars.cellSize;
 
-    const y = (node.inputCount() * 2 + 1) * cellSize;
+    const y = (node.inputCount() * 2 + 3) * cellSize;
 
     for (let i = 0; i < count; i++) {
       items.push(outPortGlue(y + i * 2 * cellSize, i, node, this.graph));
@@ -487,7 +493,7 @@ export class Designer {
     const items = [];
     const cellSize = designerVars.cellSize;
     for (let i = 0; i < count; i++) {
-      items.push(inPortGlue((i * 2 + 1) * cellSize, i, node, this.graph));
+      items.push(inPortGlue((i * 2 + 3) * cellSize, i, node, this.graph));
     }
     return glue(
       {

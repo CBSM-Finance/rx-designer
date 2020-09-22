@@ -1,9 +1,15 @@
+$height: 28px;
+
 :host {
   display: block;
   color: #111;
   background: #fff;
-  width: 320px;
+  width: 280px;
   border-left: 1px solid rgba(0, 0, 0, .08);
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
 
   .content {
     padding: 0 16px;
@@ -11,67 +17,111 @@
 
   header {
     height: 28px;
-    border-bottom: 1px solid rgba(0, 0, 0, .08);
     padding: 0 16px;
     line-height: 28px;
     font-size: 9pt;
     letter-spacing: .1px;
     font-weight: 500;
-    margin-bottom: 4px;
+    margin: 4px 0;
+
+    .btn {
+      -webkit-app-region: no-drag;
+      user-select: none;
+      border-radius: 4px;
+  
+      mat-icon {
+        cursor: default;
+        line-height: $height;
+        height: $height;
+        width: $height;
+        text-align: center;
+        vertical-align: top;
+        color: #000;
+        font-size: 12pt;
+        font-weight: 300;
+      }
+
+      &:active {
+        background-color: #f0f0f4;
+      }
+  
+      &.active {
+        background-color: #f0f0f4;
+        mat-icon {
+          color: #000780;
+        }
+      }
+    }
+  }
+
+  .label {
+    padding: 0 16px;
+    margin-bottom: 8px;
+  }
+
+  .input {
+    display: flex;
+    flex-direction: row;
+    background: #f8f8f8;
+    border-radius: 4px;
+    overflow: hidden;
+    box-sizing: border-box;
+    width: 100%;
+    border: 1px solid rgba(0,0,0,.1);
+
+    &:focus-within {
+      background: #f6f6f6;
+      box-shadow: 0 0 0px 2px rgba(0,20,180,.4), 0 0 0px 8px rgba(0,20,124,.02);
+      outline: none;
+    }
+
+    mat-icon {
+      width: 24px;
+      height: 24px;
+      line-height: 24px;
+      font-size: 9pt;
+      color: #000;
+      text-align: center;
+      background: rgba(0,0,0,.06);
+    }
+
+    input {
+      flex: 1 1;
+      border: none;
+      color: #000;
+      padding: 0 4px;
+      height: 24px;
+      line-height: 24px;
+      outline: none;
+      font-size: 9pt;
+      box-sizing: border-box;
+      background: transparent;
+    }
   }
 
   .sub-title {
-    font-size: 12px;
-    color: #111;
+    font-size: 9pt;
+    color: #000;
     height: 28px;
     line-height: 28px;
     padding: 0 16px;
     margin-bottom: 4px;
+    letter-spacing: 0.1px;
+    font-weight: 500;
   }
 
   .description {
-    color: #111;
+    color: #333;
     padding: 8px 16px;
-    font-size: 12px;
+    font-size: 9pt;
     line-height: 22px;
   }
 
-  .input {
-    padding: 8px;
-    font-size: 12px;
-    border: 1px solid rgba(0,0,0,.1);
-    background: rgba(0,0,0,.04);
-    margin: 0 16px 8px;
-    border-radius: 4px;
+  .inputs {
+    padding: 0 16px;
 
-    .index {
-      padding-right: 8px;
-      letter-spacing: 4px;
-      line-height: 28px;
-    }
-
-    .name {
-      padding-right: 16px;
-      line-height: 28px;
-    }
-
-    input {
-      padding: 0 8px;
-      margin: 0;
-      border: 1px solid rgba(0,0,0,.1);
-      outline: none;
-      background: rgba(0,0,0,.04);
-      line-height: 28px;
-      color: #111;
-      font-family: 'Roboto';
-      font-weight: 300;
-      font-size: 12px;
-      width: 100%;
-      box-sizing: border-box;
-
-      &:focus {
-        background: transparent;
-      }
+    app-node-input {
+      margin-bottom: 8px;
     }
   }
 
@@ -90,6 +140,32 @@
 
     .name {
       padding-right: 16px;
+    }
+  }
+
+  .actions {
+    padding: 16px;
+
+    .btn {
+      width: 100%;
+      letter-spacing: .1px;
+      font-size: 9pt;
+      font-weight: 500;
+      text-align: center;
+      box-sizing: border-box;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 4px;
+      cursor: default;
+      height: 28px;
+      line-height: 26px;
+
+      &:hover {
+        background-color: #f4f4f8;
+      }
+      
+      &:active {
+        background-color: #f0f0f4;
+      }
     }
   }
 }

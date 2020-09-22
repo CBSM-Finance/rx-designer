@@ -1,0 +1,19 @@
+<label [class.has-error]="hasError && !hasConn">
+  <div class="label">{{input.name}}</div>
+  <ng-container *ngIf="hasConn; else noConn">
+    <div class="btn" matRipple (click)="disconnect()">disconnect</div>
+  </ng-container>
+  <ng-template #noConn>
+    <ng-container [ngSwitch]="input.type">
+      <div *ngSwitchCase="'impulse'">TEST</div>
+      <div *ngSwitchCase="'number'">TEST</div>
+      <div *ngSwitchCase="'object'">
+        <textarea resize="none" [formControl]="control"></textarea>
+      </div>
+      <div class="input" *ngSwitchDefault>
+        <mat-icon>title</mat-icon>
+        <input type="text" [formControl]="control">
+      </div>
+    </ng-container>
+  </ng-template>
+</label>

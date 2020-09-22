@@ -10,12 +10,13 @@ export function labelGlue(node: DesignerNode, colors: any) {
     wPc: 1,
     hPx: cellSize * 2,
     customPaint: (gl, ctx) => {
+      if (!node.label) return void 0;
       const pos = gl.center();
       ctx.beginPath();
       ctx.textAlign = 'center';
       ctx.fillStyle = colors.label;
-      ctx.font = 'bold 8pt Roboto';
-      ctx.fillText(node.title, pos.x, pos.y);
+      ctx.font = '500 8pt Roboto';
+      ctx.fillText(node.label, pos.x, pos.y);
       ctx.closePath();
     },
   });

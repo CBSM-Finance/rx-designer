@@ -28,6 +28,7 @@ export abstract class DesignerNode implements BaseNode {
     return (this.constructor as typeof DesignerNode).GROUP_ID;
   }
 
+  label: string;
   state: any;
   inputs: DesignerNodeInput[];
   outputs: DesignerNodeOutput[];

@@ -9,27 +9,17 @@ export class RequestMktDataNode extends DesignerNode {
   static LOCAL_ID = 'reqMktData';
   static GROUP_ID = 'ib';
 
-  description = `Request market data.`;
+  description = `Request market data for a given contract from Interactive Brokers.`;
 
   inputs = [
     {
       name: 'Impulse',
+      type: 'impulse',
     },
     {
-      name: 'Symbol',
-      value: 'UVXY',
-    },
-    {
-      name: 'Currency',
-      value: 'USD',
-    },
-    {
-      name: 'Exchange',
-      value: 'SMART',
-    },
-    {
-      name: 'Security Type',
-      value: 'STK',
+      name: 'Contract',
+      value: '{}',
+      type: 'object',
     },
   ];
 
@@ -41,16 +31,9 @@ export class RequestMktDataNode extends DesignerNode {
 
   connect(inputs: Observable<any>[]): Observable<any>[] {
     const electron = this.state.get('electron') as ElectronCommunicationService;
-    const logger = this.state.get('logger') as LoggerService;
-
-    const mktData = combineLatest(inputs).pipe(
-      switchMap(([, symbol, currency, exchange, secType]) => electron.send('ib', 'reqmktdata', {
-        contract: {
-          symbol,
-          currency,
-          exchange,
-          secType,
-        },
+    const mktData = inputs[0].pipe(
+      switchMap(([, contract]) => electron.send('ib', 'reqmktdata', {
+        contract,
       }, true)),
       tap(response => console.log('GOT RESPONSE!', response)),
       switchMap(({ tickerId }) => electron.on('ib', 'message').pipe(

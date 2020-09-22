@@ -13,6 +13,7 @@ export function objToNode(obj: any): DesignerNode {
   const instance = new node();
   instance.inputs = obj.inputs;
   instance.outputs = obj.outputs;
+  instance.label = obj.label;
 
   return instance;
 }
@@ -22,6 +23,7 @@ export function nodeToObj(node: DesignerNode): any {
     type: `${node.groupId}.${node.localId}`,
     inputs: node.inputs,
     outputs: node.outputs,
+    label: node.label,
   };
   return obj;
 }

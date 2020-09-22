@@ -20,6 +20,7 @@ export function outPortGlue(
     customPaint: (gl, ctx: CanvasRenderingContext2D) => {
       const { pos, dim } = gl.cache;
       const output = node.outputs[i];
+      const hasConn = graph.outgoingNodes(node, i).length > 0;
 
       // label
       ctx.beginPath();
@@ -32,7 +33,7 @@ export function outPortGlue(
 
       // circle
       ctx.beginPath();
-      ctx.fillStyle = gl.props.hover ? '#9999f2' : '#b2b2b2';
+      ctx.fillStyle = hasConn ? '#6a6ff2' : (gl.props.hover ? '#9999f2' : '#b2b2b2');
       ctx.arc(pos.x + cellSize / 2, pos.y + cellSize / 2, cellSize / 2, 0, Math.PI * 2);
       ctx.fill();
       ctx.closePath();
