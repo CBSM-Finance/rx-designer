@@ -12,17 +12,23 @@ export class LaunchIBNode extends DesignerNode {
 
   description = 'Launch IB Connector.';
 
-  inputs = [];
+  inputs = [
+    {
+      name: 'Impulse',
+      type: 'impulse',
+      value: 1,
+    }
+  ];
   outputs = [
     {
       name: 'Launched',
     }
   ];
 
-  connect(): Observable<any>[] {
+  connect(inputs: Observable<any>[]): Observable<any>[] {
     const electron = this.state.get('electron') as ElectronCommunicationService;
     const logger = this.state.get('logger') as LoggerService;
-    const launched = of(true).pipe(
+    const launched = inputs[0].pipe(
       switchMap(() => electron.send('ib', 'launch', {}, true)),
       first(),
       logger.log((msg) => ({

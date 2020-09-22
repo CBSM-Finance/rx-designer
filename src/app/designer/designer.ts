@@ -454,7 +454,7 @@ export class Designer {
         this.getInPorts(node.inputs.length, node),
         this.getOutPorts(node.outputs.length, node),
         this.getLabel(node),
-        this.getTitle(node),
+        titleGlue(node),
       ]
     );
     return gl;
@@ -462,10 +462,6 @@ export class Designer {
 
   private getLabel(node: DesignerNode): Glue {
     return labelGlue(node, colors);
-  }
-
-  private getTitle(node: DesignerNode): Glue {
-    return titleGlue(node, colors);
   }
 
   private getOutPorts(count: number, node: DesignerNode) {
@@ -492,9 +488,12 @@ export class Designer {
   private getInPorts(count: number, node: DesignerNode) {
     const items = [];
     const cellSize = designerVars.cellSize;
+
     for (let i = 0; i < count; i++) {
-      items.push(inPortGlue((i * 2 + 3) * cellSize, i, node, this.graph));
+      const y = (i * 2 + 3) * cellSize;
+      items.push(inPortGlue(y, i, node, this.graph));
     }
+
     return glue(
       {
         hPx: cellSize,
@@ -505,6 +504,16 @@ export class Designer {
       items
     );
   }
+}
+
+export function connInputsCount(node: DesignerNode, index: number, graph: ReactiveGraph<DesignerNode>): number {
+  let count = 0;
+  for (let i = 0; i < index; i++) {
+    const conn = graph.incomingNode(node, i);
+    if (!conn) continue;
+    count++;
+  }
+  return count;
 }
 
 export interface MktData {

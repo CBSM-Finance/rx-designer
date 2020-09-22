@@ -29,6 +29,7 @@ export abstract class DesignerNode implements BaseNode {
   }
 
   label: string;
+  collapsed: boolean;
   state: any;
   inputs: DesignerNodeInput[];
   outputs: DesignerNodeOutput[];

@@ -1,10 +1,10 @@
-import { Observable, merge, of } from 'rxjs';
-import { tap } from 'rxjs/operators';
-import { DesignerNode } from './designer-node';
+import { Observable, merge } from 'rxjs';
+import { DesignerNode } from '../designer-node';
 
 export class MergeNode extends DesignerNode {
   static TITLE = 'Merge';
   static LOCAL_ID = 'merge';
+  static GROUP_ID = 'rx';
 
   inputs = [
     {
@@ -12,12 +12,6 @@ export class MergeNode extends DesignerNode {
     },
     {
       name: 'Second',
-    },
-    {
-      name: 'Third',
-    },
-    {
-      name: 'Fourth',
     },
   ];
 

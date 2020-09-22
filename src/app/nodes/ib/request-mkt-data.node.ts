@@ -5,7 +5,7 @@ import { ElectronCommunicationService } from 'src/app/electron-communication.ser
 import { LoggerService } from 'src/app/logger.service';
 
 export class RequestMktDataNode extends DesignerNode {
-  static TITLE = 'Request Market Data';
+  static TITLE = 'Request Mkt Data';
   static LOCAL_ID = 'reqMktData';
   static GROUP_ID = 'ib';
 

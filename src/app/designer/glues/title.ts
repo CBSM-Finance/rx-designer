@@ -4,7 +4,7 @@ import { getGroup } from 'src/app/nodes/node-groups';
 import { designerVars } from '../designer-vars';
 import { roundedRect } from '../paint/rounded-rect';
 
-export function titleGlue(node: DesignerNode, colors: any) {
+export function titleGlue(node: DesignerNode) {
   const group = getGroup(node);
   const cellSize = designerVars.cellSize;
 
@@ -18,14 +18,9 @@ export function titleGlue(node: DesignerNode, colors: any) {
       const centerPos = gl.center();
 
       ctx.beginPath();
-      // ctx.fillStyle = group.color;
-      // ctx.fillStyle = '#eee';
-
       const grd = ctx.createLinearGradient(centerPos.x, pos.y, centerPos.x, pos.y + dim.y);
       grd.addColorStop(0, '#fff');
-      // grd.addColorStop(.6, '#eee');
       grd.addColorStop(1, group.color);
-      // Fill with gradient
       ctx.fillStyle = grd;
 
       const p = 1;
