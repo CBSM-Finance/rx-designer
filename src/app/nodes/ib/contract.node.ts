@@ -37,7 +37,7 @@ export class ContractNode extends DesignerNode {
 
   connect(inputs: Observable<any>[]): Observable<any>[] {
     const contract = combineLatest(inputs).pipe(
-      map(([, symbol, currency, exchange, secType]) => ({
+      map(([symbol, currency, exchange, secType]) => ({
         symbol,
         currency,
         exchange,

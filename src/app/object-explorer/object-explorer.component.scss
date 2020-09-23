@@ -1,0 +1,55 @@
+$height: 20px;
+
+:host {
+  display: block;
+  font-size: 8pt;
+  overflow: hidden;
+  font-weight: 500;
+
+  >div {
+    &.expanded>.sign>mat-icon {
+      transform: rotate(0);
+    }
+  }
+
+  .sign {
+    cursor: default;
+    height: $height;
+    line-height: $height;
+
+    &.string {
+      color: #887722;
+    }
+
+    &.number {
+      color: #441188;
+    }
+
+    &.object {
+      font-style: italic;
+    }
+
+    span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    mat-icon {
+      height: $height;
+      line-height: $height;
+      transform: rotate(-90deg);
+      width: 16px;
+      text-align: center;
+      font-size: 18px;
+    }
+  }
+
+  .children {
+    padding-left: 8px;
+
+    span {
+      padding-right: 2px;
+    }
+  }
+}

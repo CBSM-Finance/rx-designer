@@ -11,6 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { LogsComponent } from './logs/logs.component';
 import { SystemHeaderComponent } from './system-header/system-header.component';
 import { MarblesModule } from './marbles/marbles.module';
+import { ObjectExplorerComponent } from './object-explorer/object-explorer.component';
 
 @NgModule({
   declarations: [
@@ -18,6 +19,7 @@ import { MarblesModule } from './marbles/marbles.module';
     HeaderComponent,
     LogsComponent,
     SystemHeaderComponent,
+    ObjectExplorerComponent,
   ],
   imports: [
     BrowserModule,

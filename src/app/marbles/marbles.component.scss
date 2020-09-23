@@ -1,9 +1,11 @@
+$height: 20px;
+
 :host {
   background: #fff;
   border-top: 1px solid rgba(0, 0, 0, .08);
   border-right: 1px solid rgba(0, 0, 0, .08);
   color: #111;
-  width: 100%;
+  width: 600px;
   height: 220px;
   display: flex;
   flex-direction: column;
@@ -16,6 +18,22 @@
     font-size: 9pt;
     letter-spacing: .1px;
     font-weight: 500;
+  }
+
+  .line-title {
+    padding: 0 16px;
+    width: 120px;
+    letter-spacing: .1px;
+    font-size: 9pt;
+    color: #222;
+    line-height: $height;
+    border-bottom: 1px solid rgba(0,0,0,.08);
+  }
+
+  .scroller {
+    overflow-x: auto;
+    max-width: 400px;
+    background: #e2e2ff;
   }
 
   .content {

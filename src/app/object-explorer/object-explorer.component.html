@@ -1,0 +1,12 @@
+<div [class.expanded]="expanded" [class.has-children]="hasChildren">
+  <div class="sign" fxLayout="row" [ngClass]="type" (click)="expanded = !expanded">
+    <mat-icon *ngIf="hasChildren">arrow_drop_down</mat-icon>
+    <span fxFlex>{{sign}}</span>
+  </div>
+  <div class="children" *ngIf="expanded">
+    <div *ngFor="let child of children" fxLayout="row">
+      <span>{{child[0]}}:</span>
+      <app-object-explorer [obj]="child[1]"></app-object-explorer>
+    </div>
+  </div>
+</div>

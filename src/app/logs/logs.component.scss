@@ -33,7 +33,7 @@ $height: 20px;
     overflow: auto;
 
     .log {
-      display: block;
+      display: grid;
       line-height: $height;
       color: #111;
       overflow: hidden;
@@ -43,6 +43,7 @@ $height: 20px;
       padding: 0 16px 0 0;
       font-size: 9pt;
       margin: 2px 0;
+      grid-template-columns: max-content 1fr max-content;
     
       &.error {
         color: red;
@@ -71,6 +72,7 @@ $height: 20px;
       }
 
       .node {
+        height: $height;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;

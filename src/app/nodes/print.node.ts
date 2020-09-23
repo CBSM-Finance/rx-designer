@@ -1,5 +1,5 @@
 import { Observable, combineLatest, of } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map, tap, withLatestFrom } from 'rxjs/operators';
 import { Log, LoggerService } from '../logger.service';
 import { DesignerNode } from './designer-node';
 
@@ -15,7 +15,6 @@ export class PrintNode extends DesignerNode {
     },
     {
       name: 'Interpolation',
-      value: '@0',
     },
   ];
 
@@ -27,11 +26,13 @@ export class PrintNode extends DesignerNode {
 
   connect(inputs: Observable<any>[]) {
     const logger = this.state.get('logger') as LoggerService;
-    const print = combineLatest(inputs).pipe(
-      map(([text, interpolation]) => interpolation.replace('@0', text)),
+    const print = inputs[0].pipe(
+      withLatestFrom(inputs[1]),
+      map(([text, interpolation]) => interpolation ? interpolation.replace('@0', text) : text),
       logger.log(msg => ({
         level: 'info',
-        msg,
+        msg: typeof msg !== 'object' ? msg : void 0,
+        obj: typeof msg === 'object' ? msg : void 0,
         node: 'Print',
       } as Log)),
     );

@@ -33,7 +33,8 @@ export class LoggerService {
 export type LogLevel = 'info' | 'error';
 export interface Log {
   level: LogLevel;
-  msg: any;
   node: string;
+  msg?: any;
+  obj?: any;
   timestamp?: number;
 }
