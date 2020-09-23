@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { Designer } from '../designer/designer';
 import { ElectronCommunicationService } from '../electron-communication.service';
 import { LoggerService } from '../logger.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-header',
@@ -11,7 +12,7 @@ import { LoggerService } from '../logger.service';
 export class HeaderComponent implements OnInit {
   @Input() designer: Designer;
 
-  running = false;
+  running: Observable<boolean>;
 
   private kill: () => any;
 
@@ -28,7 +29,7 @@ export class HeaderComponent implements OnInit {
   }
 
   run() {
-    this.running = true;
+    this.running = this.designer.running;
     this.kill = this.designer.run({
       electron: this.ecs,
       logger: this.logger,
@@ -38,7 +39,5 @@ export class HeaderComponent implements OnInit {
 
   stop() {
     if (this.kill) this.kill();
-    this.running = false;
-    this.cdRef.detectChanges();
   }
 }

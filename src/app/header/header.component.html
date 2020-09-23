@@ -2,12 +2,14 @@
   <div class="btn" (click)="save()">
     <mat-icon>save</mat-icon>
   </div>
-  <div class="btn" *ngIf="!running" (click)="run()">
-    <mat-icon fontSet="material-icons-outlined">play_arrow</mat-icon>
-  </div>
-  <div class="btn active" *ngIf="running" (click)="stop()">
+  <div class="btn active" *ngIf="running | async; else notRunning" (click)="stop()">
     <mat-icon>pause</mat-icon>
   </div>
+  <ng-template #notRunning>
+    <div class="btn" (click)="run()">
+      <mat-icon fontSet="material-icons-outlined">play_arrow</mat-icon>
+    </div>
+  </ng-template>
 </div>
 
 <span fxFlex></span>

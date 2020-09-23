@@ -6,7 +6,7 @@ import {
   Observable,
   EMPTY, Subscriber
 } from 'rxjs';
-import { tap, takeUntil, observeOn, filter } from 'rxjs/operators';
+import { tap, takeUntil, observeOn, filter, finalize } from 'rxjs/operators';
 import { DragHandler, Glue, glue, subtract, MouseEventHandler } from '../glue';
 import { objToNode, nodeToObj } from './obj-to-node';
 import { inPortGlue } from './glues/in-port';
@@ -17,7 +17,7 @@ import { State } from '../state';
 import { NodeBuilder } from '@cbsm-finance/reactive-nodes/dist/reactive-graph';
 import { MarblesService } from '../marbles/marbles.service';
 import { LoggerService } from '../logger.service';
-import { asapScheduler, fromEvent } from 'rxjs';
+import { asapScheduler, fromEvent, Subject, Observable } from 'rxjs';
 import { designerVars } from './designer-vars';
 import { connectedNodes } from '../marbles/connected-nodes';
 import { titleGlue } from './glues/title';
@@ -57,7 +57,9 @@ export const rxDesignerNodeBuilder = (ms: MarblesService): NodeBuilder => (
 export class Designer {
   selectedNode: DesignerNode = void 0;
   adjustedPositions: number[][];
+  running: Observable<boolean>;
 
+  private runningSub = new Subject<boolean>();
   private dh: DragHandler;
   private mh: MouseEventHandler;
   private connections: {
@@ -119,10 +121,10 @@ export class Designer {
 
     // initialize all nodes
     nodes.forEach((node) => node.initialize(state));
-
     const connectorNode = nodes.find((node) => node.localId === 'connector');
 
     if (!connectorNode) throw Error('No connector node found.');
+    this.runningSub.next(true);
 
     this.ms.reset();
     this.logger.reset();
@@ -134,24 +136,13 @@ export class Designer {
 
     this.graph.execute(connectorNode, 0).pipe(
       takeUntil(killerObservable),
-    ).subscribe(
-      (val) => {
-        // console.log('value', val);
-
-      },
-      (err) => {
-        console.log('err', err);
+      finalize(() => {
+        this.runningSub.next(false);
 
         // kill all nodes
         nodes.forEach((node) => node.kill());
-      },
-      () => {
-        console.log('COMPLETE');
-
-        // kill all nodes
-        nodes.forEach((node) => node.kill());
-      }
-    );
+      }),
+    ).subscribe();
 
     return () => killerObserver.next(void 0);
   }
@@ -164,6 +155,7 @@ export class Designer {
     private ms: MarblesService,
     private logger: LoggerService
   ) {
+    this.running = this.runningSub.asObservable();
     this.zoom(0);
     bgCanvas.style.backgroundColor = colors.bg;
     this.drawGrid(bgCanvas.getContext('2d'), bgCanvas);
