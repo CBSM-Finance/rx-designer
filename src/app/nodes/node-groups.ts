@@ -3,8 +3,8 @@ import { TextNode } from './text.node';
 import { MergeNode } from './rx/merge.node';
 import { PrintNode } from './print.node';
 import { ConnectorNode } from './connector.node';
-import { NumberNode } from './number.node';
-import { IsEvenNode } from './is-even.node';
+import { NumberNode } from './math/number.node';
+import { IsEvenNode } from './math/is-even.node';
 import { LaunchIBNode } from './ib/launch-ib.node';
 import { ConnectTWSNode } from './ib/connect-tws.node';
 import { IfNode } from './math/if.node';
@@ -23,8 +23,8 @@ export const nodeGroups: NodeGroup[] = [
     title: 'System',
     id: 'system',
     color: '#e2d244',
-    icon: 'settings',
-    nodes: [TextNode, PrintNode, ConnectorNode, NumberNode, IsEvenNode],
+    icon: 'trip_origin',
+    nodes: [TextNode, PrintNode, ConnectorNode],
   },
   {
     title: 'RX',
@@ -38,7 +38,7 @@ export const nodeGroups: NodeGroup[] = [
     id: 'math',
     color: '#1288a2',
     icon: 'functions',
-    nodes: [IfNode, MultiplyNode],
+    nodes: [IfNode, MultiplyNode, NumberNode, IsEvenNode],
   },
   {
     title: 'Interactive Brokers',

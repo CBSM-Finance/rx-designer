@@ -2,7 +2,7 @@ import {
   Component,
   AfterViewInit, ChangeDetectorRef
 } from '@angular/core';
-import { Designer } from './designer/designer';
+import { Designer, loadIconFont } from './designer/designer';
 import * as json from './conf.json';
 import { DesignerNode } from './nodes/designer-node';
 import { MarblesService } from './marbles/marbles.service';
@@ -20,7 +20,9 @@ export class AppComponent implements AfterViewInit {
     private ms: MarblesService,
     private logger: LoggerService,
     private cdRef: ChangeDetectorRef,
-  ) { }
+  ) {
+    loadIconFont();
+  }
 
   ngAfterViewInit() {
     const canvas = document.querySelectorAll('canvas')[1] as HTMLCanvasElement;

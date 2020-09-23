@@ -1,9 +1,12 @@
-<header>
-  Logs
+<header fxLayout="row" fxLayoutAlign="center center">
+  <span fxFlex>Logs</span>
+  <input type="text" placeholder="Filter">
 </header>
 <div class="scroll-container">
   <div [ngClass]="log.level" fxLayout="row" class="log" *ngFor="let log of logs | async; trackBy: trackByFn">
+    <mat-icon>chevron_right</mat-icon>
     <div class="node">{{log.node}}</div>
-    <div fxFlex class="msg">{{log.msg | json}}</div>
+    <div fxFlex class="msg">{{log.msg}}</div>
+    <div class="timestamp" [title]="log.timestamp | date: 'd.MM.y HH:mm:ss'">{{log.timestamp | date: 'HH:mm:ss'}}</div>
   </div>
 </div>

@@ -2,7 +2,6 @@ import { glue } from 'src/app/glue';
 import { DesignerNode } from 'src/app/nodes/designer-node';
 import { getGroup } from 'src/app/nodes/node-groups';
 import { designerVars } from '../designer-vars';
-import { roundedRect } from '../paint/rounded-rect';
 
 export function titleGlue(node: DesignerNode) {
   const group = getGroup(node);
@@ -10,31 +9,16 @@ export function titleGlue(node: DesignerNode) {
 
   return glue({
     xPx: 0,
-    yPx: 0,
+    yPx: -cellSize * 2,
     wPc: 1,
     hPx: cellSize * 2,
     customPaint: (gl, ctx) => {
-      const { pos, dim } = gl.cache;
-      const centerPos = gl.center();
-
+      const pos = gl.center();
       ctx.beginPath();
-      // const grd = ctx.createLinearGradient(centerPos.x, pos.y, centerPos.x, pos.y + dim.y);
-      // grd.addColorStop(0, '#fff');
-      // grd.addColorStop(1, group.color);
-      // ctx.fillStyle = grd;
-      ctx.fillStyle = '#f2f2f2';
-
-      const p = 1;
-      ctx.fillRect(pos.x + p, pos.y + p, dim.x - p * 2, dim.y - p * 2);
-      // roundedRect(ctx, pos.x + p, pos.y + p, dim.x - p * 2, dim.y - p * 2, cellSize);
-      // ctx.fill();
-      ctx.closePath();
-
-      ctx.beginPath();
-      ctx.textAlign = 'left';
-      ctx.fillStyle = '#000';
-      ctx.font = `500 ${6 * designerVars.zoomFactor}pt Roboto`;
-      ctx.fillText(node.title, pos.x + cellSize, pos.y + cellSize);
+      ctx.textAlign = 'center';
+      ctx.fillStyle = 'black';
+      ctx.font = `700 ${7 * designerVars.zoomFactor}pt Roboto`;
+      ctx.fillText(node.title, pos.x, pos.y);
       ctx.closePath();
     },
   });

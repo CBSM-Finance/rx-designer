@@ -12,7 +12,10 @@ export class LoggerService {
 
   log(transform: (msg: any) => Log): OperatorFunction<any, any> {
     return source => source.pipe(
-      tap(msg => this.logsSubject.next(transform(msg))),
+      tap(msg => this.logsSubject.next({
+        ...transform(msg),
+        timestamp: new Date().getTime(),
+      } as Log)),
     );
   }
 
@@ -32,4 +35,5 @@ export interface Log {
   level: LogLevel;
   msg: any;
   node: string;
+  timestamp?: number;
 }

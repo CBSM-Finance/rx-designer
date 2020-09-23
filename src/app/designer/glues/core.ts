@@ -3,6 +3,8 @@ import { roundedRect } from '../paint/rounded-rect';
 import { Designer } from '../designer';
 import { DesignerNode } from 'src/app/nodes/designer-node';
 import { designerVars } from '../designer-vars';
+import { getGroup } from '../../nodes/node-groups';
+import { connectedNodes } from '../../marbles/connected-nodes';
 
 export function coreGlue(designer: Designer, node: DesignerNode) {
   return glue({
@@ -14,9 +16,14 @@ export function coreGlue(designer: Designer, node: DesignerNode) {
     label: 'core',
     customPaint: (gl, ctx) => {
       const { pos, dim } = gl.cache;
+      const center = gl.center();
+
+      const group = getGroup(node);
+      const isConnected = connectedNodes(designer.graph).includes(node);
 
       ctx.save();
-      ctx.fillStyle = '#fff';
+      // ctx.fillStyle = lightenColor(group.color, 99.9);
+      ctx.fillStyle = '#fafafa';
       // ctx.fillStyle = 'rgba(255, 255, 255, .9)';
       ctx.shadowColor = '#dadada';
 
@@ -33,11 +40,24 @@ export function coreGlue(designer: Designer, node: DesignerNode) {
       ctx.beginPath();
       // ctx.fillRect(pos.x, pos.y + .5, dim.x, dim.y);
       // ctx.strokeRect(pos.x, pos.y + .5, dim.x, dim.y);
-      roundedRect(ctx, pos.x, pos.y + .5, dim.x, dim.y, designerVars.adjCellSize());
+      roundedRect(
+        ctx,
+        pos.x,
+        pos.y + 0.5,
+        dim.x,
+        dim.y,
+        designerVars.adjCellSize()
+      );
       ctx.closePath();
       ctx.fill('evenodd');
       ctx.stroke();
       ctx.restore();
+
+      ctx.fillStyle = isConnected ? group.color : '#ddd';
+      ctx.font = '18pt material-icons';
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'center';
+      ctx.fillText(group.icon, center.x, center.y);
     },
   });
 }

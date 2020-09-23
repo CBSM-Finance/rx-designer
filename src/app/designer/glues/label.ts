@@ -4,9 +4,11 @@ import { designerVars } from '../designer-vars';
 
 export function labelGlue(node: DesignerNode, colors: any) {
   const cellSize = designerVars.adjCellSize();
+  const coreHeight = cellSize * 4;
+
   return glue({
     xPx: 0,
-    yPx: -cellSize * 2,
+    yPx: coreHeight,
     wPc: 1,
     hPx: cellSize * 2,
     customPaint: (gl, ctx) => {
@@ -15,7 +17,7 @@ export function labelGlue(node: DesignerNode, colors: any) {
       ctx.beginPath();
       ctx.textAlign = 'center';
       ctx.fillStyle = colors.label;
-      ctx.font = `500 ${7 * designerVars.zoomFactor}pt Roboto`;
+      ctx.font = `400 ${8 * designerVars.zoomFactor}pt Roboto`;
       ctx.fillText(node.label, pos.x, pos.y);
       ctx.closePath();
     },

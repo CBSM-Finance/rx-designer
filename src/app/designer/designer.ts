@@ -6,13 +6,12 @@ import {
   Observable,
   EMPTY, Subscriber
 } from 'rxjs';
-import { tap, takeUntil, switchMapTo, share, observeOn, takeWhile, filter } from 'rxjs/operators';
+import { tap, takeUntil, observeOn, filter } from 'rxjs/operators';
 import { DragHandler, Glue, glue, subtract, MouseEventHandler } from '../glue';
 import { objToNode, nodeToObj } from './obj-to-node';
 import { inPortGlue } from './glues/in-port';
 import { outPortGlue } from './glues/out-port';
 import { coreGlue } from './glues/core';
-import { labelGlue } from './glues/label';
 import { DesignerNode } from '../nodes/designer-node';
 import { State } from '../state';
 import { NodeBuilder } from '@cbsm-finance/reactive-nodes/dist/reactive-graph';
@@ -22,14 +21,14 @@ import { asapScheduler, fromEvent } from 'rxjs';
 import { designerVars } from './designer-vars';
 import { connectedNodes } from '../marbles/connected-nodes';
 import { titleGlue } from './glues/title';
-import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { labelGlue } from './glues/label';
 
 const colors = {
   bg: '#fff',
   grid: '#e2e2e4',
   ports: '#888',
   label: '#000',
-  connections: 'rgba(0,0,180,.2)',
+  connections: 'rgba(0,0,180,.6)',
   dragConnection: '#aaa',
 };
 
@@ -487,10 +486,8 @@ export class Designer {
     const gridSize = designerVars.adjCellSize() * 2;
     const gl = glue(
       {
-        wPx: designerVars.adjCellSize() * 14,
-        hPx:
-          designerVars.adjCellSize() *
-          ((node.inputCount() + node.outputCount()) * 2 + 3),
+        wPx: designerVars.adjCellSize() * 4,
+        hPx: designerVars.adjCellSize() * 4,
         xPx: x,
         yPx: y,
         snapToGrid: gridSize,
@@ -500,33 +497,33 @@ export class Designer {
         coreGlue(this, node),
         this.getInPorts(node.inputs.length, node),
         this.getOutPorts(node.outputs.length, node),
-        this.getLabel(node),
+        labelGlue(node, colors),
         titleGlue(node),
       ]
     );
     return gl;
   }
 
-  private getLabel(node: DesignerNode): Glue {
-    return labelGlue(node, colors);
-  }
-
   private getOutPorts(count: number, node: DesignerNode) {
     const items = [];
     const cellSize = designerVars.adjCellSize();
-
-    const y = (node.inputCount() * 2 + 3) * cellSize;
+    const coreHeight = cellSize * 4;
+    const outPortHeight = cellSize;
+    const coreCenter = coreHeight / 2;
+    const outPortsHeight = count * outPortHeight;
+    const offsetY = coreCenter - outPortsHeight / 2;
 
     for (let i = 0; i < count; i++) {
-      items.push(outPortGlue(y + i * 2 * cellSize, i, node, this.graph));
+      const y = offsetY + i * cellSize;
+      items.push(outPortGlue(y, i, node, this.graph));
     }
     return glue(
       {
         hPx: cellSize,
         wPx: cellSize,
-        xPx: -cellSize * 2,
-        anchor: 'topRight',
+        xPx: 0,
         color: 'transparent',
+        anchor: 'topRight',
       },
       items
     );
@@ -535,9 +532,14 @@ export class Designer {
   private getInPorts(count: number, node: DesignerNode) {
     const items = [];
     const cellSize = designerVars.adjCellSize();
+    const coreHeight = cellSize * 4;
+    const inPortHeight = cellSize;
+    const coreCenter = coreHeight / 2;
+    const inPortsHeight = count * inPortHeight;
+    const offsetY = coreCenter - inPortsHeight / 2;
 
     for (let i = 0; i < count; i++) {
-      const y = (i * 2 + 3) * cellSize;
+      const y = offsetY + i * cellSize;
       items.push(inPortGlue(y, i, node, this.graph));
     }
 
@@ -545,12 +547,20 @@ export class Designer {
       {
         hPx: cellSize,
         wPx: cellSize,
-        xPx: cellSize,
+        xPx: -cellSize,
         color: 'transparent',
       },
       items
     );
   }
+}
+
+declare const FontFace: any;
+
+export function loadIconFont(): Promise<any> {
+  const materialFont = new FontFace('material-icons', 'url(https://fonts.gstatic.com/s/materialicons/v55/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2)');
+  (document as any).fonts.add(materialFont);
+  return materialFont.load();
 }
 
 export function connInputsCount(node: DesignerNode, index: number, graph: ReactiveGraph<DesignerNode>): number {

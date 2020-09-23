@@ -1,9 +1,10 @@
 import { Observable, of } from 'rxjs';
-import { DesignerNode } from './designer-node';
+import { DesignerNode } from '../designer-node';
 
 export class NumberNode extends DesignerNode {
   static TITLE = 'Number';
   static LOCAL_ID = 'number';
+  static GROUP_ID = 'math';
 
   description = `Provide a static number.`;
 

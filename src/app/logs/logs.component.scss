@@ -1,3 +1,5 @@
+$height: 20px;
+
 :host {
   display: grid;
   background: #fff;
@@ -16,6 +18,15 @@
     font-size: 9pt;
     letter-spacing: .1px;
     font-weight: 500;
+
+    input {
+      border: 1px solid rgba(0,0,0,.08);
+      border-radius: 0;
+      padding: 0 4px;
+      outline: none;
+      line-height: 20px;
+      height: 20px;
+    }
   }
 
   .scroll-container {
@@ -23,16 +34,28 @@
 
     .log {
       display: block;
-      line-height: 28px;
-      color: #aaa;
+      line-height: $height;
+      color: #111;
       overflow: hidden;
       text-overflow: ellipsis;
       width: 100%;
       box-sizing: border-box;
-      padding: 0 16px;
-
+      padding: 0 16px 0 0;
+      font-size: 9pt;
+      margin: 2px 0;
+    
       &.error {
         color: red;
+      }
+
+      mat-icon {
+        font-size: 10pt;
+        height: $height;
+        line-height: $height;
+        text-align: center;
+        color: #00229a;
+        font-weight: 700;
+        width: 16px;
       }
 
       >div {
@@ -40,15 +63,22 @@
         vertical-align: top;
       }
 
+      .msg {
+      }
+
+      .timestamp {
+
+      }
+
       .node {
-        width: 120px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        padding-right: 16px;
+        padding: 0 2px;
+        margin-right: 4px;
+        border-radius: 2px;
+        background: #f2dddd;
       }
     }
-
-
   }
 }
