@@ -120,9 +120,9 @@ export class Designer {
     // initialize all nodes
     nodes.forEach((node) => node.initialize(state));
 
-    const lastNode = nodes.find((node) => node.localId === 'connector');
+    const connectorNode = nodes.find((node) => node.localId === 'connector');
 
-    if (!lastNode) throw Error('No last node found.');
+    if (!connectorNode) throw Error('No connector node found.');
 
     this.ms.reset();
     this.logger.reset();
@@ -132,10 +132,13 @@ export class Designer {
       killerObserver = observer;
     });
 
-    this.graph.execute(lastNode, 0).pipe(
+    this.graph.execute(connectorNode, 0).pipe(
       takeUntil(killerObservable),
     ).subscribe(
-      () => {},
+      (val) => {
+        // console.log('value', val);
+
+      },
       (err) => {
         console.log('err', err);
 

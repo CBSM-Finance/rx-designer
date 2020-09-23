@@ -1,4 +1,4 @@
-import { Observable, merge } from 'rxjs';
+import { Observable } from 'rxjs';
 import { DesignerNode } from './designer-node';
 
 export class ConnectorNode extends DesignerNode {
@@ -19,6 +19,6 @@ export class ConnectorNode extends DesignerNode {
   description = 'Last node.';
 
   connect(inputs: Observable<any>[]): Observable<any>[] {
-    return [merge(...inputs)];
+    return inputs;
   }
 }

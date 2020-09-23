@@ -36,8 +36,6 @@ export class ObjectExplorerComponent implements OnInit {
         }
         return `${key}: ${value}`;
       }).join(', ') + '}';
-
-    this.sign = JSON.stringify(this.obj);
   }
 
   private getChildren() {

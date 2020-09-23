@@ -14,7 +14,6 @@ export class ScheduleEventHandler extends EventHandler {
     on('scheduling', 'cron', async (data) => {
       const { cron } = data.payload;
       const job = scheduleJob(cron, () => {
-        console.log('Today is recognized by Rebecca Black!');
         send('scheduling', data.respondCommand);
       });
       this.cronJobs.push(job);

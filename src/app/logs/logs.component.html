@@ -2,16 +2,22 @@
   <span fxFlex>Logs</span>
   <input type="text" placeholder="Filter">
 </header>
-<div class="scroll-container">
-  <div [ngClass]="log.level" class="log" *ngFor="let log of logs | async; trackBy: trackByFn">
-    <div fxLayout="row">
-      <mat-icon>chevron_right</mat-icon>
-      <div class="node">{{log.node}}</div>
+<div fxLayout="row" class="no-overflow">
+  <div class="node-names">
+    <div *ngFor="let nn of nodeNames | async" [class.active]="nodeFilter === nn[0]" (click)="filterByNode(nn[0])">{{nn[0] || 'All nodes'}} ({{nn[1]}})</div>
+  </div>
+  <div fxFlex class="scroll-container">
+    <div [ngClass]="log.level" class="log" [class.hide]="nodeFilter && nodeFilter != log.node" *ngFor="let log of logs | async; trackBy: trackByFn">
+      <div fxLayout="row">
+        <mat-icon>chevron_right</mat-icon>
+        <div class="node">{{log.node}}</div>
+      </div>
+      <div class="msg">
+        <span *ngIf="log.msg">{{log.msg}}</span>
+        <app-object-explorer *ngIf="log.obj" [obj]="log.obj"></app-object-explorer>
+      </div>
+      <div class="timestamp" [title]="log.timestamp | date: 'd.MM.y HH:mm:ss'">{{log.timestamp | date: 'HH:mm:ss'}}
+      </div>
     </div>
-    <div class="msg">
-      <span *ngIf="log.msg">{{log.msg}}</span>
-      <app-object-explorer *ngIf="log.obj" [obj]="log.obj"></app-object-explorer>
-    </div>
-    <div class="timestamp" [title]="log.timestamp | date: 'd.MM.y HH:mm:ss'">{{log.timestamp | date: 'HH:mm:ss'}}</div>
   </div>
 </div>

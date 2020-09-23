@@ -29,6 +29,27 @@ $height: 20px;
     }
   }
 
+  .no-overflow {
+    overflow: hidden;
+  }
+
+  .node-names {
+    border-right: 1px solid rgba(0, 0, 0, .08);
+    width: 180px;
+
+    >div {
+      padding: 0 16px;
+      line-height: 24px;
+      height: 24px;
+      cursor: default;
+      font-size: 9pt;
+
+      &.active {
+        background: #e2e2ff;
+      }
+    }
+  }
+
   .scroll-container {
     overflow: auto;
 
@@ -47,6 +68,10 @@ $height: 20px;
     
       &.error {
         color: red;
+      }
+
+      &.hide {
+        display: none;
       }
 
       mat-icon {

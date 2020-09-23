@@ -17,6 +17,7 @@ import { TransmitOrderNode } from './ib/transmit-order.node';
 import { PluckNode } from './rx/pluck.node';
 import { MapToNode } from './rx/map-to.node';
 import { MultiplyNode } from './math/multiply.node';
+import { TakeNode } from './rx/take.node';
 
 export const nodeGroups: NodeGroup[] = [
   {
@@ -31,7 +32,7 @@ export const nodeGroups: NodeGroup[] = [
     id: 'rx',
     color: '#89008E',
     icon: 'local_fire_department',
-    nodes: [MergeNode, CombineLatestNode, PluckNode, MapToNode],
+    nodes: [MergeNode, CombineLatestNode, PluckNode, MapToNode, TakeNode],
   },
   {
     title: 'Math',
