@@ -1,5 +1,5 @@
 import { Observable, of, combineLatest } from 'rxjs';
-import { filter, mapTo, share, switchMapTo, tap } from 'rxjs/operators';
+import { filter, finalize, mapTo, share, switchMapTo, tap } from 'rxjs/operators';
 import { ElectronCommunicationService } from 'src/app/electron-communication.service';
 import { DesignerNode } from '../designer-node';
 import { LoggerService } from '../../logger.service';
@@ -39,10 +39,9 @@ export class ConnectTWSNode extends DesignerNode {
     },
   ];
 
-  connect(inputs: Observable<any>[]): Observable<any>[] {
+  connect(inputs: Observable<any>): Observable<any>[] {
     const electron = this.state.get('electron') as ElectronCommunicationService;
-    const connect = combineLatest(inputs).pipe(
-      tap(() => console.log('connect tws')),
+    const connect = inputs.pipe(
       tap(([, port, host, clientId]) =>
         electron.send('ib', 'connect', {
           port,
@@ -50,6 +49,10 @@ export class ConnectTWSNode extends DesignerNode {
           clientId,
         })
       ),
+      // finalize(() => {
+      //   electron.send('ib', 'disconnect');
+      //   console.log('connect done');
+      // }),
       switchMapTo(electron.on('ib', 'message')),
       filter((msg) => msg.type === 'connection'),
       share()
@@ -66,6 +69,7 @@ export class ConnectTWSNode extends DesignerNode {
   }
 
   kill() {
+    console.log('kill');
     const electron = this.state.get('electron') as ElectronCommunicationService;
     electron.send('ib', 'disconnect');
   }

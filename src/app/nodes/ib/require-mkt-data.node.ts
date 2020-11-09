@@ -27,11 +27,12 @@ export class RequireMktDataNode extends DesignerNode {
     },
   ];
 
-  connect(inputs: Observable<any>[]): Observable<any>[] {
-    const mktData = combineLatest(inputs).pipe(
-      filter(([data, fields]) => true),
-      map(([data]) => data),
-    );
-    return [mktData];
+  connect(inputs: Observable<any>): Observable<any>[] {
+    // const mktData = combineLatest(inputs).pipe(
+    //   filter(([data, fields]) => true),
+    //   map(([data]) => data),
+    // );
+    // return [mktData];
+    return [];
   }
 }

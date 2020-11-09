@@ -3,7 +3,8 @@ export function paintArrow(
   pos: { x: number; y: number },
   dim: { x: number; y: number }
 ): void {
-  const pad = 1;
+  const pad = 0;
+
   pos = { x: pos.x + pad, y: pos.y + pad };
   dim = { x: dim.x - pad * 2, y: dim.y - pad * 2 };
 

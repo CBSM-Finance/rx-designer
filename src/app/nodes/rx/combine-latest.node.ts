@@ -10,9 +10,11 @@ export class CombineLatestNode extends DesignerNode {
   inputs = [
     {
       name: 'First',
+      emit: true,
     },
     {
       name: 'Second',
+      emit: true,
     },
   ];
 
@@ -25,8 +27,8 @@ export class CombineLatestNode extends DesignerNode {
     },
   ];
 
-  connect(inputs: Observable<any>[]) {
-    const combined = combineLatest(inputs);
+  connect(inputs: Observable<any>) {
+    const combined = inputs;
     return [
       combined.pipe(map(([first]) => first)),
       combined.pipe(map(([, second]) => second)),

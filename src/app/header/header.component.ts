@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnInit, AfterViewInit } from '@angular/core';
 import { Designer } from '../designer/designer';
 import { ElectronCommunicationService } from '../electron-communication.service';
 import { LoggerService } from '../logger.service';
@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, AfterViewInit {
   @Input() designer: Designer;
 
   running: Observable<boolean>;
@@ -22,14 +22,17 @@ export class HeaderComponent implements OnInit {
     private cdRef: ChangeDetectorRef,
   ) { }
 
-  ngOnInit(): void {}
+  ngAfterViewInit() {
+    this.running = this.designer.running;
+  }
+
+  ngOnInit(): void { }
 
   save() {
     this.designer.save();
   }
 
   run() {
-    this.running = this.designer.running;
     this.kill = this.designer.run({
       electron: this.ecs,
       logger: this.logger,

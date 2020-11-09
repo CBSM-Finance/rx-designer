@@ -24,10 +24,10 @@ export class IsEvenNode extends DesignerNode {
     },
   ];
 
-  connect(inputs: Observable<any>[]) {
+  connect(inputs: Observable<any>) {
     return [
-      inputs[0].pipe(filter(num => num % 2 === 0)),
-      inputs[0].pipe(filter(num => num % 2 !== 0)),
+      inputs.pipe(filter(num => num % 2 === 0)),
+      inputs.pipe(filter(num => num % 2 !== 0)),
     ];
   }
 }

@@ -22,9 +22,9 @@ export class MultiplyNode extends DesignerNode {
     },
   ];
 
-  connect(inputs: Observable<any>[]) {
-    const obs = combineLatest(inputs).pipe(
-      map(([a, b]) => a * b),
+  connect(inputs: Observable<any>) {
+    const obs = inputs.pipe(
+      map(vals => vals.reduce((acc: number, num: number) => acc * num, 1)),
     );
     return [obs];
   }

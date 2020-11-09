@@ -5,6 +5,9 @@ import { DesignerNode } from 'src/app/nodes/designer-node';
 import { designerVars } from '../designer-vars';
 import { getGroup } from '../../nodes/node-groups';
 import { connectedNodes } from '../../marbles/connected-nodes';
+import { colors, design } from '../colors';
+
+const borderWidth = 2;
 
 export function coreGlue(designer: Designer, node: DesignerNode) {
   return glue({
@@ -18,46 +21,35 @@ export function coreGlue(designer: Designer, node: DesignerNode) {
       const { pos, dim } = gl.cache;
       const center = gl.center();
 
-      const group = getGroup(node);
+      const { hover } = gl.props;
+      const nodeGroup = getGroup(node);
       const isConnected = connectedNodes(designer.graph).includes(node);
 
       ctx.save();
-      // ctx.fillStyle = lightenColor(group.color, 99.9);
-      ctx.fillStyle = '#fafafa';
-      // ctx.fillStyle = 'rgba(255, 255, 255, .9)';
-      ctx.shadowColor = '#dadada';
+      ctx.fillStyle = isConnected ? colors.core.bgConnected : colors.core.bgDisconnected;
+      ctx.strokeStyle = hover ? colors.core.borderHover : colors.core.border;
 
       if (designer.selectedNode === node) {
         ctx.lineWidth = 1 * designerVars.zoomFactor;
-        ctx.shadowBlur = 8 * designerVars.zoomFactor;
-        ctx.strokeStyle = '#000678';
       } else {
         ctx.lineWidth = 1 * designerVars.zoomFactor;
-        ctx.shadowBlur = (gl.props.hover ? 8 : 0) * designerVars.zoomFactor;
-        ctx.strokeStyle = '#ccc';
       }
 
       ctx.beginPath();
-      // ctx.fillRect(pos.x, pos.y + .5, dim.x, dim.y);
-      // ctx.strokeRect(pos.x, pos.y + .5, dim.x, dim.y);
       roundedRect(
         ctx,
         pos.x,
         pos.y + 0.5,
         dim.x,
         dim.y,
-        designerVars.adjCellSize()
+        designerVars.adjCellSize() * design.cornerRadius,
       );
       ctx.closePath();
-      ctx.fill('evenodd');
+      ctx.fill();
+
+      ctx.lineWidth = borderWidth;
       ctx.stroke();
       ctx.restore();
-
-      ctx.fillStyle = isConnected ? group.color : '#ddd';
-      ctx.font = '18pt material-icons';
-      ctx.textBaseline = 'middle';
-      ctx.textAlign = 'center';
-      ctx.fillText(group.icon, center.x, center.y);
     },
   });
 }

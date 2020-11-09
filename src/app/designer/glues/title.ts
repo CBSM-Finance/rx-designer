@@ -1,6 +1,7 @@
 import { glue } from 'src/app/glue';
 import { DesignerNode } from 'src/app/nodes/designer-node';
 import { getGroup } from 'src/app/nodes/node-groups';
+import { colors } from '../colors';
 import { designerVars } from '../designer-vars';
 
 export function titleGlue(node: DesignerNode) {
@@ -13,12 +14,12 @@ export function titleGlue(node: DesignerNode) {
     wPc: 1,
     hPx: cellSize * 2,
     customPaint: (gl, ctx) => {
-      const pos = gl.center();
+      const { pos } = gl.cache;
       ctx.beginPath();
-      ctx.textAlign = 'center';
-      ctx.fillStyle = 'black';
-      ctx.font = `700 ${7 * designerVars.zoomFactor}pt Roboto`;
-      ctx.fillText(node.title, pos.x, pos.y);
+      ctx.textAlign = 'left';
+      ctx.fillStyle = colors.title;
+      ctx.font = `500 ${8 * designerVars.zoomFactor}pt Roboto`;
+      ctx.fillText(node.title, pos.x, pos.y + cellSize);
       ctx.closePath();
     },
   });

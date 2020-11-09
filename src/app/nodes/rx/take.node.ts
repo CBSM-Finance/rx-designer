@@ -24,11 +24,12 @@ export class TakeNode extends DesignerNode {
     },
   ];
 
-  connect(inputs: Observable<any>[]) {
+  connect(inputs: Observable<any>) {
     const taken = inputs[1].pipe(
       first(),
       switchMap((count: string) => inputs[0].pipe(take(parseInt(count, 10)))),
     );
+
     return [taken];
   }
 }

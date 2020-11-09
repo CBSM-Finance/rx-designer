@@ -1,6 +1,6 @@
 <div fxLayout="column" fxFlex>
   <app-system-header></app-system-header>
-  <app-header [designer]="designer"></app-header>
+  <app-header *ngIf="designer" [designer]="designer"></app-header>
   <div fxLayout="row" fxFlex>
     <div class="side-bar" fxLayout="column">
       <app-node-repository (instantiate)="addNode($event)"></app-node-repository>

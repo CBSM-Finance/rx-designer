@@ -20,7 +20,7 @@ export class TextNode extends DesignerNode {
     },
   ];
 
-  connect(inputs: Observable<any>[]) {
-    return [inputs[0]];
+  connect(inputs: Observable<any>) {
+    return [inputs];
   }
 }

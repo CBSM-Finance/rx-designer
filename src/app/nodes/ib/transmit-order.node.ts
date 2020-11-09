@@ -31,7 +31,7 @@ export class TransmitOrderNode extends DesignerNode {
     },
   ];
 
-  connect(inputs: Observable<any>[]): Observable<any>[] {
+  connect(inputs: Observable<any>): Observable<any>[] {
     const transmit = combineLatest(inputs).pipe(
       tap(() => console.log('transmit order')),
     );

@@ -23,7 +23,7 @@ export class MapToNode extends DesignerNode {
     },
   ];
 
-  connect(inputs: Observable<any>[]) {
+  connect(inputs: Observable<any>) {
     return [inputs[0].pipe(
       withLatestFrom(inputs[1]),
       map(([, value]) => value),

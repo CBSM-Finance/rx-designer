@@ -30,8 +30,8 @@ export class IfNode extends DesignerNode {
     },
   ];
 
-  connect(inputs: Observable<any>[]) {
-    const obs = combineLatest(inputs).pipe(
+  connect(inputs: Observable<any>) {
+    const obs = inputs.pipe(
       map(([expr, ...args]) => evaluate(expr
         .replace('@0', args[0])
         .replace('@1', args[1]))),

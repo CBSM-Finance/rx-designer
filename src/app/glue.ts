@@ -16,13 +16,15 @@ export interface GlueProps {
   color: string;
   xOffsetPx: number;
   yOffsetPx: number;
-  customPaint: (
-    gl: Glue,
-    ctx: CanvasRenderingContext2D,
-    canvas: HTMLCanvasElement
-  ) => any;
+  customPaint: GlueCustomPaint;
   [key: string]: any;
 }
+
+export type GlueCustomPaint = (
+  gl: Glue,
+  ctx: CanvasRenderingContext2D,
+  canvas: HTMLCanvasElement,
+) => any;
 
 export interface Glue {
   props: GlueProps;

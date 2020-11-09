@@ -55,8 +55,8 @@ export abstract class DesignerNode implements BaseNode {
    */
   kill() {}
 
-  connect(inputs: Observable<any>[]): Observable<any>[] {
-    return inputs;
+  connect(inputs: Observable<any>): Observable<any>[] {
+    return [inputs];
   }
 }
 
@@ -64,7 +64,8 @@ export class DesignerNodeInput {
   name: string;
   value?: any;
   type?: string;
-  expose?: boolean;
+  required?: boolean;
+  emit?: boolean;
 }
 
 export class DesignerNodeOutput {

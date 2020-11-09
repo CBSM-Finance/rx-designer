@@ -1,4 +1,4 @@
-import { Observable, merge, combineLatest } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DesignerNode } from '../designer-node';
 
@@ -24,8 +24,8 @@ export class PluckNode extends DesignerNode {
     },
   ];
 
-  connect(inputs: Observable<any>[]) {
-    const plucked = combineLatest(inputs).pipe(
+  connect(inputs: Observable<any>) {
+    const plucked = inputs.pipe(
       map(([obj, key]) => obj[key]),
     );
     return [plucked];

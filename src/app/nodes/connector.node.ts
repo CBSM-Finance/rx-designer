@@ -18,7 +18,7 @@ export class ConnectorNode extends DesignerNode {
 
   description = 'Last node.';
 
-  connect(inputs: Observable<any>[]): Observable<any>[] {
-    return inputs;
+  connect(inputs: Observable<any>): Observable<any>[] {
+    return [inputs];
   }
 }

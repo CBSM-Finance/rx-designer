@@ -1,6 +1,5 @@
 import { DesignerNode } from './designer-node';
 import { TextNode } from './text.node';
-import { MergeNode } from './rx/merge.node';
 import { PrintNode } from './print.node';
 import { ConnectorNode } from './connector.node';
 import { NumberNode } from './math/number.node';
@@ -18,6 +17,7 @@ import { PluckNode } from './rx/pluck.node';
 import { MapToNode } from './rx/map-to.node';
 import { MultiplyNode } from './math/multiply.node';
 import { TakeNode } from './rx/take.node';
+import { WaitSchedulerNode } from './scheduling/wait-scheduler.node';
 
 export const nodeGroups: NodeGroup[] = [
   {
@@ -32,7 +32,7 @@ export const nodeGroups: NodeGroup[] = [
     id: 'rx',
     color: '#89008E',
     icon: 'local_fire_department',
-    nodes: [MergeNode, CombineLatestNode, PluckNode, MapToNode, TakeNode],
+    nodes: [CombineLatestNode, PluckNode, MapToNode, TakeNode], // MergeNode
   },
   {
     title: 'Math',
@@ -53,7 +53,7 @@ export const nodeGroups: NodeGroup[] = [
     id: 'scheduling',
     color: '#888',
     icon: 'alarm',
-    nodes: [CronSchedulerNode],
+    nodes: [CronSchedulerNode, WaitSchedulerNode],
   },
 ];
 

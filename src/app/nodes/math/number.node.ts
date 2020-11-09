@@ -23,7 +23,7 @@ export class NumberNode extends DesignerNode {
     },
   ];
 
-  connect(inputs: Observable<any>[]) {
+  connect(inputs: Observable<any>) {
     return [inputs[0]];
   }
 }

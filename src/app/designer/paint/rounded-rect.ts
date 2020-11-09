@@ -6,6 +6,11 @@ export function roundedRect(
   h: number,
   r: number
 ) {
+  if (r === 0) {
+    ctx.rect(x, y, w, h);
+    return;
+  }
+
   if (w < 2 * r) r = w / 2;
   if (h < 2 * r) r = h / 2;
   ctx.moveTo(x + r, y);

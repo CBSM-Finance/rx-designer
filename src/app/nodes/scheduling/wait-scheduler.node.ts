@@ -4,9 +4,9 @@ import { DesignerNode } from '../designer-node';
 import { ElectronCommunicationService } from 'src/app/electron-communication.service';
 import { Log, LoggerService } from 'src/app/logger.service';
 
-export class CronSchedulerNode extends DesignerNode {
-  static TITLE = 'Cron Scheduler';
-  static LOCAL_ID = 'cronScheduler';
+export class WaitSchedulerNode extends DesignerNode {
+  static TITLE = 'Wait Scheduler';
+  static LOCAL_ID = 'waitScheduler';
   static GROUP_ID = 'scheduling';
 
   inputs = [
@@ -14,8 +14,8 @@ export class CronSchedulerNode extends DesignerNode {
       name: 'Impulse',
     },
     {
-      name: 'Cron',
-      value: '*/1 * * * *', // run every minute
+      name: 'Seconds',
+      value: 5, // run every minute
     },
   ];
 
@@ -27,15 +27,16 @@ export class CronSchedulerNode extends DesignerNode {
 
   connect(inputs: Observable<any>) {
     const logger = this.state.get('logger') as LoggerService;
-    const electron = this.state.get('electron') as ElectronCommunicationService;
     const obs = inputs[0].pipe(
       withLatestFrom(inputs[1]),
-      switchMap(([, cron]) => electron.send('scheduling', 'cron', { cron }, true).pipe(mapTo(`Cron invocation: ${cron}`))),
+      switchMap(([, seconds]) => new Observable(observer => {
+        setTimeout(() => (observer.next(), observer.complete()), seconds * 1000);
+      }).pipe(mapTo(`Wait scheduler invocation: ${seconds}`))),
       logger.log(msg => ({
         level: 'info',
         msg: typeof msg !== 'object' ? msg : void 0,
         obj: typeof msg === 'object' ? msg : void 0,
-        node: 'Cron Scheduler',
+        node: 'Wait Scheduler',
       } as Log)),
     );
     return [obs];

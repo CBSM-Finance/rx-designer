@@ -25,7 +25,7 @@ export class LaunchIBNode extends DesignerNode {
     }
   ];
 
-  connect(inputs: Observable<any>[]): Observable<any>[] {
+  connect(inputs: Observable<any>): Observable<any>[] {
     const electron = this.state.get('electron') as ElectronCommunicationService;
     const logger = this.state.get('logger') as LoggerService;
     const launched = inputs[0].pipe(

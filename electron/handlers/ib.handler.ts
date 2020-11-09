@@ -2,6 +2,7 @@ import { IBConnectorClient } from '@cbsm-finance/ib-connector-ts-client';
 import { EventHandler } from './event-handler';
 import { tap } from 'rxjs/operators';
 import { IBConnectorType } from '@cbsm-finance/ib-connector-ts-client/dist/types/ib-connector-type';
+import { Observable } from 'rxjs';
 
 export class IBEventHandler extends EventHandler {
   client = new IBConnectorClient('./');
@@ -43,15 +44,20 @@ export class IBEventHandler extends EventHandler {
   private observeAll() {
     const { on, localCommands, client } = this;
 
-    on(
-      'ib',
-      (cmd) => !localCommands.includes(cmd),
-      (data) => client.send({
+    const obs = new Observable(observer => {
+      on(
+        'ib',
+        (cmd) => !localCommands.includes(cmd),
+        (data) => observer.next(data),
+      );
+    }).pipe(
+      tap((data: any) => client.send({
         type: data.command,
         respondCommand: data.respondCommand,
         ...data.payload,
-      }),
+      })),
     );
+    this.subs.sink = obs.subscribe();
   }
 }
 
