@@ -21,6 +21,7 @@ export const colors = {
     border: 'transparent',
   },
   dragConnection: '#999',
+  dragConnectionDocking: '#7102FF',
 };
 
 export const design = {

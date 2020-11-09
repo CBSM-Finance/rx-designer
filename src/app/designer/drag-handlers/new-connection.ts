@@ -1,4 +1,4 @@
-import { glue } from '../../glue';
+import { Glue, glue, add, subtract } from '../../glue';
 import { colors } from '../colors';
 import { Designer } from '../designer';
 import { designerVars } from '../designer-vars';
@@ -9,7 +9,8 @@ export interface DragConnection {
 }
 
 export class NewConnectionDragHandler {
-  dragConnection = void 0;
+  private dragConnection = void 0;
+  private docking = false;
 
   paint(canvas: HTMLCanvasElement) {
     if (!this.dragConnection) return;
@@ -19,13 +20,12 @@ export class NewConnectionDragHandler {
       wPx: this.dragConnection.to.x,
       hPx: this.dragConnection.to.y,
       asLine: true,
-      color: colors.connections,
       customPaint: (gl, ctx) => {
         const { pos, dim } = gl.cache;
         const offset = 0;
         ctx.save();
         ctx.beginPath();
-        ctx.strokeStyle = colors.dragConnection;
+        ctx.strokeStyle = this.docking ? colors.dragConnectionDocking : colors.dragConnection;
         ctx.setLineDash([4, 8]);
         ctx.lineWidth = 2;
         ctx.moveTo(pos.x + offset, pos.y);
@@ -53,19 +53,22 @@ export class NewConnectionDragHandler {
   reload() {
     const { glNodes, dh, graph, canvas } = this.designer;
 
-    glNodes.forEach((gl, i) => {
-      gl.query('out-port').forEach((port, outPort) => {
+    glNodes.forEach((nodeGlue, i) => {
+      nodeGlue.query('out-port').forEach((port, outPort) => {
         dh.register(port, {
           setRef: dg => dg.path[0],
           onMove: ({ glue, delta }) => {
+            const center = glue.center();
+            const inPort = this.hoveredInPort(nodeGlue, add(center, delta));
+            this.docking = Boolean(inPort);
             this.dragConnection = {
-              from: glue.center(),
-              to: delta,
+              from: center,
+              to: this.docking ? subtract(inPort.centerLeft(), center) : delta,
             };
           },
           onDrop: ({ event }) => {
             glNodes.find((g, h) => {
-              if (g === gl) return false;
+              if (g === nodeGlue) return false;
               const rect = canvas.getBoundingClientRect();
               const { translate } = designerVars;
               const inPort = g
@@ -96,4 +99,24 @@ export class NewConnectionDragHandler {
   }
 
   constructor(private designer: Designer) {}
+
+  private hoveredInPort(excludeNode: Glue, pos: { x: number; y: number }): Glue {
+    const { glNodes } = this.designer;
+    const { translate } = designerVars;
+
+    for (const nodeGlue of glNodes) {
+      if (nodeGlue === excludeNode) continue;
+
+      const inPort = nodeGlue
+        .query('in-port')
+        .find(port =>
+          port.intersect(
+            pos.x - translate.x,
+            pos.y - translate.y,
+          ).length > 0,
+        );
+      if (!inPort) continue;
+      return inPort;
+    }
+  }
 }
