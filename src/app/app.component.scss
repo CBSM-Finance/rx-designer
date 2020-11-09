@@ -3,7 +3,7 @@
   position: absolute;
   height: 100%;
   width: 100%;
-  background: #121218;
+  background: #e0e0e0;
 
   .side-bar {
     width: 320px;
@@ -22,6 +22,11 @@
       height: 100%;
       left: 0;
       top: 0;
+      transition: opacity .2s ease;
+
+      &.hidden {
+        // opacity: 0;
+      }
     }
   }
 

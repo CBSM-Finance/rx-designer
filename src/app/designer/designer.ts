@@ -37,7 +37,7 @@ export class Designer {
   dh: DragHandler;
   mh: MouseEventHandler;
 
-  private newConnectionDragHandler = new NewConnectionDragHandler(this);
+  newConnectionDragHandler = new NewConnectionDragHandler(this);
   private moveNodeDragHandler = new MoveNodeDragHandler(this);
   private hoverMouseHandler = new HoverMouseHandler(this);
   private selectNodeMouseHandler = new SelectNodeMouseHandler(this);
@@ -151,6 +151,10 @@ export class Designer {
     return () => killerObserver.next(void 0);
   }
 
+  toggleGrid(show: boolean): void {
+    this.bgCanvas.classList.toggle('hidden', !show);
+  }
+
   constructor(
     public graph: ReactiveGraph<DesignerNode>,
     public positions: number[][],
@@ -168,6 +172,7 @@ export class Designer {
   }
 
   public removeNode(node: DesignerNode): void {
+    alert('remove node');
     if (this.selectedNode === node) {
       this.selectedNode = void 0;
     }
@@ -209,8 +214,8 @@ export class Designer {
     this.glNodes = this.graph.nodes.map(
       (node, i) =>
         nodeGlue(this, {
-          x: this.adjustedPositions[i][0],
-          y: this.adjustedPositions[i][1],
+          x: this.adjustedPositions[i][0] + .5,
+          y: this.adjustedPositions[i][1] + .5,
           node,
         }) as Glue,
     );
@@ -260,7 +265,7 @@ export class Designer {
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
   }
 
-  private repaint() {
+  repaint() {
     const ctx = this.canvas.getContext('2d');
 
     this.resizeCanvas(ctx);
@@ -268,29 +273,66 @@ export class Designer {
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     ctx.translate(designerVars.translate.x, designerVars.translate.y);
 
-    this.newConnectionDragHandler.paint(this.canvas);
+    // if (this.moveNodeDragHandler.dragPreview) {
+    //   const prev = this.moveNodeDragHandler.dragPreview;
+    //   ctx.beginPath();
+    //   ctx.fillStyle = colors.drawPreview;
+    //   ctx.fillRect(prev.x, prev.y, prev.w, prev.h);
+    //   ctx.closePath();
+    // }
     this.glNodes.forEach(g => g.paint(this.canvas));
 
     const lines = connectionsGlue(this) as Glue[];
     lines.forEach(g => g.paint(this.canvas));
+
+    this.newConnectionDragHandler.paint(this.canvas);
   }
 
   private drawGrid(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
     const w = canvas.width;
     const h = canvas.height;
-    const gridSize = designerVars.adjCellSize() * 2;
+    const gridSize = designerVars.adjCellSize();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const translateX = designerVars.translate.x % gridSize;
     const translateY = designerVars.translate.y % gridSize;
 
-    for (let y = translateY; y < h; y += gridSize) {
-      for (let x = translateX; x < w; x += gridSize) {
-        ctx.beginPath();
-        ctx.fillStyle = colors.grid;
-        ctx.arc(x, y, 1 * designerVars.zoomFactor, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.closePath();
-      }
+    // for (let y = translateY; y < h; y += gridSize) {
+    //   for (let x = translateX; x < w; x += gridSize) {
+    //     ctx.beginPath();
+    //     ctx.fillStyle = colors.grid;
+    //     ctx.arc(x, y, 1 * designerVars.zoomFactor, 0, Math.PI * 2);
+    //     ctx.fill();
+    //     ctx.closePath();
+    //   }
+    // }
+
+    for (let x = gridSize * 12 + .5; x < w; x += gridSize * 12) {
+      ctx.beginPath();
+      ctx.lineWidth = .5;
+      ctx.strokeStyle = colors.grid;
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, h);
+      ctx.closePath();
+      ctx.stroke();
+
+      x += gridSize * 2;
+      ctx.beginPath();
+      ctx.lineWidth = .5;
+      ctx.strokeStyle = colors.grid;
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, h);
+      ctx.closePath();
+      ctx.stroke();
+    }
+
+    for (let y = .5; y < h; y += gridSize) {
+      ctx.beginPath();
+      ctx.lineWidth = .5;
+      ctx.strokeStyle = colors.grid;
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.closePath();
+      ctx.stroke();
     }
   }
 }

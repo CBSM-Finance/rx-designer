@@ -15,16 +15,16 @@ export const nodeGlue: GlueFactory<NodeGlueFactoryOpts> = (
   designer,
   { x, y, node },
 ) => {
-  const gridSize = designerVars.adjCellSize() * 2;
+  const gridSize = designerVars.adjCellSize();
   const height = coreHeight(node);
 
   const gl = glue(
     {
-      wPx: gridSize * 6,
+      wPx: gridSize * 12,
       hPx: height,
       xPx: x,
       yPx: y,
-      snapToGrid: gridSize,
+      // snapToGrid: { x: void 0, y: gridSize * 2 },
       color: 'transparent',
     },
     [

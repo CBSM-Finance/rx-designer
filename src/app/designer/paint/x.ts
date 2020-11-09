@@ -3,7 +3,7 @@ export function paintX(
   pos: { x: number; y: number },
   dim: { x: number; y: number }
 ): void {
-  const pad = 2;
+  const pad = 1;
   ctx.beginPath();
   ctx.moveTo(pos.x + pad, pos.y + pad);
   ctx.lineTo(pos.x + dim.x - pad, pos.y + dim.y - pad);

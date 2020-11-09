@@ -4,7 +4,7 @@ export class DisconnectPortMouseHandler {
   reload() {
     const { mh, glNodes, graph } = this.designer;
     glNodes.forEach((gl, i) => {
-      gl.query('in-port').forEach((port, inPort) => {
+      gl.query('in-port-symbol').forEach((port, inPort) => {
         mh.register(port, {
           onClick: () => {
             const nodes = graph.nodes;

@@ -34,6 +34,21 @@ export class HoverMouseHandler {
             },
           });
         });
+
+      gl.query('in-port-symbol')
+        .forEach(port => {
+          mh.register(port, {
+            onMove: (ev: MouseEvent) => {
+              const rect = canvas.getBoundingClientRect();
+              const { translate } = designerVars;
+              return (port.props.hover =
+                port.intersect(
+                  ev.pageX - rect.x - translate.x,
+                  ev.pageY - rect.y - translate.y,
+                ).length > 0);
+            },
+          });
+        });
     });
   }
 

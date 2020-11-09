@@ -30,7 +30,7 @@ export const outPortsGlue: GlueFactory<OutPortsFactoryOpts> = (designer, { node 
         const { dim, pos } = gl.cache;
         ctx.beginPath();
         ctx.fillStyle = colors.ports.separator;
-        ctx.fillRect(pos.x, pos.y - cellSize / 2 - borderWidth / 2, dim.x, borderWidth);
+        ctx.fillRect(pos.x + cellSize / 2, pos.y - cellSize / 2 - borderWidth / 2, dim.x - cellSize, borderWidth);
         ctx.closePath();
       }
     },

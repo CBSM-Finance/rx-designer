@@ -9,8 +9,9 @@ export interface DragConnection {
 }
 
 export class NewConnectionDragHandler {
+  docking = false;
+
   private dragConnection = void 0;
-  private docking = false;
 
   paint(canvas: HTMLCanvasElement) {
     if (!this.dragConnection) return;
@@ -67,6 +68,7 @@ export class NewConnectionDragHandler {
             };
           },
           onDrop: ({ event }) => {
+            this.docking = false;
             glNodes.find((g, h) => {
               if (g === nodeGlue) return false;
               const rect = canvas.getBoundingClientRect();

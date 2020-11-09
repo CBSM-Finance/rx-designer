@@ -7,7 +7,7 @@ import { getGroup } from '../../nodes/node-groups';
 import { connectedNodes } from '../../marbles/connected-nodes';
 import { colors, design } from '../colors';
 
-const borderWidth = 2;
+const borderWidth = 1;
 
 export function coreGlue(designer: Designer, node: DesignerNode) {
   return glue({
@@ -22,34 +22,30 @@ export function coreGlue(designer: Designer, node: DesignerNode) {
       const center = gl.center();
 
       const { hover } = gl.props;
-      const nodeGroup = getGroup(node);
       const isConnected = connectedNodes(designer.graph).includes(node);
 
       ctx.save();
       ctx.fillStyle = isConnected ? colors.core.bgConnected : colors.core.bgDisconnected;
       ctx.strokeStyle = hover ? colors.core.borderHover : colors.core.border;
 
-      if (designer.selectedNode === node) {
-        ctx.lineWidth = 1 * designerVars.zoomFactor;
-      } else {
-        ctx.lineWidth = 1 * designerVars.zoomFactor;
-      }
-
       ctx.beginPath();
-      roundedRect(
-        ctx,
-        pos.x,
-        pos.y + 0.5,
-        dim.x,
-        dim.y,
-        designerVars.adjCellSize() * design.cornerRadius,
-      );
+      ctx.fillRect(pos.x, pos.y, dim.x, dim.y);
+      // roundedRect(
+      //   ctx,
+      //   pos.x,
+      //   pos.y + 0.5,
+      //   dim.x,
+      //   dim.y,
+      //   designerVars.adjCellSize() * design.cornerRadius,
+      // );
       ctx.closePath();
       ctx.fill();
 
-      ctx.lineWidth = borderWidth;
-      ctx.stroke();
-      ctx.restore();
+      if (designer.selectedNode === node) {
+        ctx.lineWidth = borderWidth * designerVars.zoomFactor;
+        ctx.stroke();
+        ctx.restore();
+      }
     },
   });
 }

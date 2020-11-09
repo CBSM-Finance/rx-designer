@@ -10,7 +10,7 @@ export interface GlueProps {
   hPc: number;
   xPx: number;
   yPx: number;
-  snapToGrid: number;
+  snapToGrid: { x: number; y: number };
   label: string[] | string;
   anchor: 'center' | 'topLeft' | 'topRight';
   color: string;
@@ -61,7 +61,7 @@ export function add(a: { x: number; y: number }, b: { x: number; y: number }) {
 
 export function subtract(
   a: { x: number; y: number },
-  b: { x: number; y: number }
+  b: { x: number; y: number },
 ) {
   return { x: a.x - b.x, y: a.y - b.y };
 }
@@ -70,7 +70,7 @@ export function len(a: { x: number; y: number }) {
   return math.hypot(a.x, a.y);
 }
 
-function dot(a: { x: number; y: number }, b: { x: number; y: number }) {
+export function dot(a: { x: number; y: number }, b: { x: number; y: number }) {
   return { x: a.x * b.x, y: a.y * b.y };
 }
 
@@ -87,7 +87,7 @@ function computeDim(gl: Glue, parent?: Glue): { x: number; y: number } {
 
 function getAnchorOffset(
   anchor: string,
-  parent?: Glue
+  parent?: Glue,
 ): { x: number; y: number } {
   switch (anchor) {
     case 'center':
@@ -102,11 +102,11 @@ function getAnchorOffset(
 
 function snapToGrid(
   pos: { x: number; y: number },
-  grid: number
+  grid: { x: number; y: number },
 ): { x: number; y: number } {
   return {
-    x: ~~(pos.x / grid + 0.5) * grid,
-    y: ~~(pos.y / grid + 0.5) * grid,
+    x: grid.x === void 0 ? pos.x : ~~(pos.x / grid.x - .25) * grid.x,
+    y: grid.y === void 0 ? pos.y : ~~(pos.y / grid.y + 0.5) * grid.y,
   };
 }
 
@@ -117,7 +117,7 @@ function computePos(gl: Glue, parent?: Glue): { x: number; y: number } {
       x: gl.props.xPx + gl.props.xOffsetPx,
       y: gl.props.yPx + gl.props.yOffsetPx,
     },
-    anchorOffset
+    anchorOffset,
   );
   const pos = parent ? add(parent.cache.pos, local) : local;
   if (gl.props.snapToGrid)
@@ -132,7 +132,7 @@ function hasLabel(gl: Glue, label: string | string[]): boolean {
     return label.indexOf(lbl) !== -1;
   }
   if (typeof label === 'string') return lbl.indexOf(label) !== -1;
-  return Boolean(label.find((l) => lbl.indexOf(l) !== -1));
+  return Boolean(label.find(l => lbl.indexOf(l) !== -1));
 }
 
 function paint(gl: Glue, canvas: HTMLCanvasElement, parent?: Glue): void {
@@ -151,20 +151,20 @@ function paint(gl: Glue, canvas: HTMLCanvasElement, parent?: Glue): void {
     ctx.closePath();
   }
 
-  (gl.children || []).forEach((child) => paint(child, canvas, gl));
+  (gl.children || []).forEach(child => paint(child, canvas, gl));
 }
 
 function intersect(gl: Glue, x: number, y: number): any[] {
   if (anyNegatives(subtract({ x, y }, gl.cache.pos))) return [];
   if (anyNegatives(subtract(add(gl.cache.pos, gl.cache.dim), { x, y })))
     return [];
-  const childInt = gl.children.map((child) => intersect(child, x, y));
+  const childInt = gl.children.map(child => intersect(child, x, y));
   return [gl, childInt];
 }
 
 function query(gl: Glue, label: string | string[]): Glue[] {
   return gl.children
-    .map((child) => query(child, label))
+    .map(child => query(child, label))
     .flat(1)
     .concat(hasLabel(gl, label) ? [gl] : []);
 }
@@ -209,14 +209,14 @@ export class MouseEventHandler {
   constructor(canvas: HTMLCanvasElement) {
     const moveRepaint = fromEvent(canvas, 'mousemove').pipe(
       map(
-        (ev) =>
-          this.mouseEventConfs.filter((conf) => {
+        ev =>
+          this.mouseEventConfs.filter(conf => {
             const onMove = conf.callbacks.onMove;
             if (!onMove) return;
             return onMove(ev);
-          }).length > 0
+          }).length > 0,
       ),
-      mapTo(void 0)
+      mapTo(void 0),
     );
 
     const click = fromEvent(canvas, 'mousedown').pipe(
@@ -227,12 +227,12 @@ export class MouseEventHandler {
               len(
                 subtract(
                   { x: ev.pageX, y: ev.pageY },
-                  { x: ev2.pageX, y: ev2.pageY }
-                )
-              ) <= 4
-          )
-        )
-      )
+                  { x: ev2.pageX, y: ev2.pageY },
+                ),
+              ) <= 4,
+          ),
+        ),
+      ),
     );
 
     const clickRepaint = click.pipe(
@@ -241,20 +241,20 @@ export class MouseEventHandler {
         return (
           this.mouseEventConfs
             .filter(
-              (conf) =>
+              conf =>
                 (conf.glue as Glue).intersect(
                   ev.pageX - rect.x,
-                  ev.pageY - rect.y
-                ).length > 0
+                  ev.pageY - rect.y,
+                ).length > 0,
             )
-            .filter((conf) => {
+            .filter(conf => {
               const onClick = conf.callbacks.onClick;
               if (!onClick) return;
               return onClick(ev);
             }).length > 0
         );
       }),
-      mapTo(void 0)
+      mapTo(void 0),
     );
 
     this.markForRepaint = merge(moveRepaint, clickRepaint);
@@ -298,16 +298,16 @@ export class DragHandler {
         tap(({ x, y }) => {
           const draggers: Dragger[] = this.dragConfs
             .map(
-              (conf) =>
-                ({ conf, path: conf.glue.intersect(x, y) } as Partial<Dragger>)
+              conf =>
+                ({ conf, path: conf.glue.intersect(x, y) } as Partial<Dragger>),
             )
-            .map((dg) => ({
+            .map(dg => ({
               ...dg,
               handle: this.getDragHandle(dg.path, dg.conf),
             }))
-            .filter((dg) => Boolean(dg.handle))
+            .filter(dg => Boolean(dg.handle))
             .map(
-              (dg) => ({ ...dg, ref: dg.conf.callbacks.setRef(dg) } as Dragger)
+              dg => ({ ...dg, ref: dg.conf.callbacks.setRef(dg) } as Dragger),
             );
 
           if (draggers.length === 0) return;
@@ -318,7 +318,7 @@ export class DragHandler {
           const { xOffsetPx, yOffsetPx } = (this.dragger.ref as any).props;
           this.startOffset = { x: xOffsetPx, y: yOffsetPx };
         }),
-        takeUntil(this.unsub)
+        takeUntil(this.unsub),
       )
       .subscribe();
 
@@ -333,17 +333,18 @@ export class DragHandler {
             y: ev.pageY - rect.y - translate.y,
           };
         }),
-        map((mPos) => subtract(mPos, this.dragMouseStartPos)),
-        tap((delta) => {
+        map(mPos => [mPos, subtract(mPos, this.dragMouseStartPos)]),
+        tap(([mPos, delta]) => {
           const { startOffset } = this;
           this.dragger.conf.callbacks.onMove({
+            mPos,
             delta,
             startOffset,
             glue: this.dragger.ref as any,
           });
           this.markForRepaintSub.next();
         }),
-        takeUntil(this.unsub)
+        takeUntil(this.unsub),
       )
       .subscribe();
 
@@ -355,7 +356,7 @@ export class DragHandler {
           if (onDrop) onDrop({ event: ev });
           this.dragger = void 0;
         }),
-        takeUntil(this.unsub)
+        takeUntil(this.unsub),
       )
       .subscribe();
   }
@@ -376,7 +377,7 @@ export class DragHandler {
   register(
     gl: Glue,
     callbacks: DragConfCallbacks,
-    label: string | string[] = void 0
+    label: string | string[] = void 0,
   ) {
     this.dragConfs.push({
       glue: gl,
@@ -409,6 +410,7 @@ export type DragMoveCallback = (args: {
   glue: Glue;
   startOffset: { x: number; y: number };
   delta: { x: number; y: number };
+  mPos: { x: number; y: number };
 }) => any;
 
 export interface Dragger {
