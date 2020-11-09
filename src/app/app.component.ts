@@ -2,11 +2,12 @@ import {
   Component,
   AfterViewInit, ChangeDetectorRef
 } from '@angular/core';
-import { Designer, loadIconFont } from './designer/designer';
+import { Designer } from './designer/designer';
 import * as json from './conf.json';
 import { DesignerNode } from './nodes/designer-node';
 import { MarblesService } from './marbles/marbles.service';
 import { LoggerService } from './logger.service';
+import { loadIconFont } from './designer/load-icon-font';
 
 @Component({
   selector: 'app-root',

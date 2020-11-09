@@ -20,7 +20,7 @@ export const inPortsGlue: GlueFactory<InPortsFactoryOpts> = (designer, { node })
   return glue(
     {
       hPc: 1,
-      wPx: cellSize * 2,
+      wPc: 1,
       xPx: 0,
       color: 'transparent',
     },
@@ -39,7 +39,7 @@ export const inPortGlue: GlueFactory<InPortFactoryOpts> = ({ graph }, { y, i, no
     label: 'in-port',
     anchor: 'topLeft',
     customPaint: (gl, ctx) => {
-      const { pos } = gl.cache;
+      const { pos, dim } = gl.cache;
       const connected = graph.incomingNode(node, i);
       const input = node.inputs[i];
       const { hover } = gl.props;

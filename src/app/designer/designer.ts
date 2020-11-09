@@ -1,16 +1,10 @@
 import { ReactiveGraph } from '@cbsm-finance/reactive-nodes';
-import {
-  merge,
-  of,
-  Subject,
-  Observable,
- Subscriber,
-} from 'rxjs';
+import { merge, of, Subject, Observable, Subscriber } from 'rxjs';
 import { tap, takeUntil, filter, finalize } from 'rxjs/operators';
-import { DragHandler, Glue, glue, subtract, MouseEventHandler } from '../glue';
+import { DragHandler, Glue, glue, MouseEventHandler } from '../glue';
 import { objToNode, nodeToObj } from './obj-to-node';
-import { inPortGlue, inPortsGlue } from './glues/in-ports';
-import { outPortGlue, outPortsGlue } from './glues/out-ports';
+import { inPortsGlue } from './glues/in-ports';
+import { outPortsGlue } from './glues/out-ports';
 import { coreGlue } from './glues/core';
 import { DesignerNode } from '../nodes/designer-node';
 import { State } from '../state';
@@ -19,11 +13,16 @@ import { LoggerService } from '../logger.service';
 import { fromEvent } from 'rxjs';
 import { designerVars } from './designer-vars';
 import { connectedNodes } from '../marbles/connected-nodes';
-import { titleGlue } from './glues/title';
-import { labelGlue } from './glues/label';
 import { rxDesignerNodeBuilder } from './node-builder';
 import { colors } from './colors';
 import { connectionsGlue } from './glues/connections';
+import { pixelRatio } from './pixel-ratio';
+import { nodeGlue } from './glues/node';
+import { NewConnectionDragHandler } from './drag-handlers/new-connection';
+import { MoveNodeDragHandler } from './drag-handlers/move-node';
+import { HoverMouseHandler } from './mouse-handlers/hover';
+import { SelectNodeMouseHandler } from './mouse-handlers/select-node';
+import { DisconnectPortMouseHandler } from './mouse-handlers/disconnect-port';
 
 type DesignerConnection = {
   source: number;
@@ -36,14 +35,17 @@ export class Designer {
   selectedNode: DesignerNode = void 0;
   adjustedPositions: number[][];
   running: Observable<boolean>;
-
   connections: DesignerConnection[];
   glNodes: Glue[];
+  dh: DragHandler;
+  mh: MouseEventHandler;
 
+  private newConnectionDragHandler = new NewConnectionDragHandler(this);
+  private moveNodeDragHandler = new MoveNodeDragHandler(this);
+  private hoverMouseHandler = new HoverMouseHandler(this);
+  private selectNodeMouseHandler = new SelectNodeMouseHandler(this);
+  private disconnectPortMouseHandler = new DisconnectPortMouseHandler(this);
   private runningSub = new Subject<boolean>();
-  private dh: DragHandler;
-  private mh: MouseEventHandler;
-  private dragConnection = void 0;
   private unsub = new Subject<void>();
 
   static fromJson(
@@ -51,10 +53,10 @@ export class Designer {
     canvas: HTMLCanvasElement,
     bgCanvas: HTMLCanvasElement,
     ms: MarblesService,
-    logger: LoggerService
+    logger: LoggerService,
   ): Designer {
     const obj = typeof json === 'string' ? JSON.parse(json) : json;
-    const nodes = obj.nodes.map((o) => objToNode(o));
+    const nodes = obj.nodes.map(o => objToNode(o));
     const edges = obj.edges;
     const graph = new ReactiveGraph<DesignerNode>(nodes, edges, {
       nodeBuilder: rxDesignerNodeBuilder(ms),
@@ -62,12 +64,41 @@ export class Designer {
     return new Designer(graph, obj.positions, canvas, bgCanvas, ms, logger);
   }
 
-  zoom(factor = 0, mPos: { x: number, y: number } = void 0) {
-    const newZoomFactor = Math.min(Math.max(designerVars.zoomFactor + factor, .6), 1.4);
+  getConnections(): {
+    source: number;
+    target: number;
+    inPort: number;
+    outPort: number;
+  }[] {
+    const connections: any = [];
+    this.graph.edges.forEach((edges, source) => {
+      edges.forEach((conns, target) => {
+        if (conns === 0) return;
+        conns.forEach(([outPort, inPort]) =>
+          connections.push({
+            source,
+            target,
+            outPort,
+            inPort,
+          }),
+        );
+      });
+    });
+    return (this.connections = connections);
+  }
+
+  zoom(factor = 0, mPos: { x: number; y: number } = void 0) {
+    const newZoomFactor = Math.min(
+      Math.max(designerVars.zoomFactor + factor, 0.6),
+      1.4,
+    );
     const delta = newZoomFactor - designerVars.zoomFactor;
     designerVars.zoomFactor = newZoomFactor;
 
-    this.adjustedPositions = this.positions.map(([x, y]) => [x * designerVars.zoomFactor, y * designerVars.zoomFactor]);
+    this.adjustedPositions = this.positions.map(([x, y]) => [
+      x * designerVars.zoomFactor,
+      y * designerVars.zoomFactor,
+    ]);
 
     if (mPos) {
       const { translate } = designerVars;
@@ -94,8 +125,8 @@ export class Designer {
     const nodes = connectedNodes(this.graph);
 
     // initialize all nodes
-    nodes.forEach((node) => node.initialize(state));
-    const connectorNode = nodes.find((node) => node.localId === 'connector');
+    nodes.forEach(node => node.initialize(state));
+    const connectorNode = nodes.find(node => node.localId === 'connector');
 
     if (!connectorNode) throw Error('No connector node found.');
     this.runningSub.next(true);
@@ -107,31 +138,29 @@ export class Designer {
       killerObserver = observer;
     });
 
-    this.graph.execute(connectorNode, 0).pipe(
-      finalize(() => {
-        this.runningSub.next(false);
+    this.graph
+      .execute(connectorNode, 0)
+      .pipe(
+        finalize(() => {
+          this.runningSub.next(false);
 
-        // kill all nodes
-        nodes.forEach((node) => node.kill());
-      }),
-      takeUntil(killerObservable),
-    ).subscribe();
+          // kill all nodes
+          nodes.forEach(node => node.kill());
+        }),
+        takeUntil(killerObservable),
+      )
+      .subscribe();
 
     return () => killerObserver.next(void 0);
   }
 
-  coreHeight(node: DesignerNode): number {
-    const cellSize = designerVars.adjCellSize();
-    return ((node.inputs.length + node.outputs.length) * 2 + 1) * cellSize;
-  }
-
   constructor(
     public graph: ReactiveGraph<DesignerNode>,
-    private positions: number[][],
-    private canvas: HTMLCanvasElement,
+    public positions: number[][],
+    public canvas: HTMLCanvasElement,
     private bgCanvas: HTMLCanvasElement,
     private ms: MarblesService,
-    private logger: LoggerService
+    private logger: LoggerService,
   ) {
     this.running = this.runningSub.asObservable();
     this.zoom(0);
@@ -165,125 +194,36 @@ export class Designer {
   private reload() {
     this.reset();
 
-    fromEvent(this.canvas, 'mousewheel').pipe(
-      filter((ev: WheelEvent) => ev.ctrlKey),
-      tap((ev: WheelEvent) => {
-        const rect = this.canvas.getBoundingClientRect();
-        const mPos = {
-          x: ev.pageX - rect.x,
-          y: ev.pageY - rect.y,
-        };
-        this.zoom(Math.sign(ev.deltaY) * -.04, mPos);
-      }),
-      takeUntil(this.unsub),
-    ).subscribe();
+    fromEvent(this.canvas, 'mousewheel')
+      .pipe(
+        filter((ev: WheelEvent) => ev.ctrlKey),
+        tap((ev: WheelEvent) => {
+          const rect = this.canvas.getBoundingClientRect();
+          const mPos = {
+            x: ev.pageX - rect.x,
+            y: ev.pageY - rect.y,
+          };
+          this.zoom(Math.sign(ev.deltaY) * -0.04, mPos);
+        }),
+        takeUntil(this.unsub),
+      )
+      .subscribe();
 
-    this.glNodes = this.graph.nodes.map((node, i) =>
-      this.addItem(this.adjustedPositions[i][0], this.adjustedPositions[i][1], node)
+    this.glNodes = this.graph.nodes.map(
+      (node, i) =>
+        nodeGlue(this, {
+          x: this.adjustedPositions[i][0],
+          y: this.adjustedPositions[i][1],
+          node,
+        }) as Glue,
     );
     this.getConnections();
 
-    this.glNodes.forEach((gl, i) => {
-      const core = gl.query('core')[0];
-      this.mh.register(core, {
-        onMove: (ev: MouseEvent) => {
-          const rect = this.canvas.getBoundingClientRect();
-          const { translate } = designerVars;
-          return (core.props.hover =
-            core.intersect(ev.pageX - rect.x - translate.x, ev.pageY - rect.y - translate.y).length > 0);
-        },
-      });
-
-      gl.query('in-port')
-        .concat(gl.query('out-port'))
-        .forEach((port) => {
-          this.mh.register(port, {
-            onMove: (ev: MouseEvent) => {
-              const rect = this.canvas.getBoundingClientRect();
-              const { translate } = designerVars;
-              return (port.props.hover =
-                port.intersect(ev.pageX - rect.x - translate.x, ev.pageY - rect.y - translate.y).length >
-                0);
-            },
-          });
-        });
-
-      gl.query('out-port').forEach((port, outPort) => {
-        this.dh.register(port, {
-          setRef: (dg) => dg.path[0],
-          onMove: ({ glue, delta }) => {
-            this.dragConnection = {
-              from: glue.center(),
-              to: delta,
-            };
-          },
-          onDrop: ({ event }) => {
-            this.glNodes.find((g, h) => {
-              if (g === gl) return false;
-              const rect = this.canvas.getBoundingClientRect();
-              const { translate } = designerVars;
-              const inPort = g
-                .query('in-port')
-                .findIndex(
-                  (p) =>
-                    p.intersect(event.pageX - rect.x - translate.x, event.pageY - rect.y - translate.y)
-                      .length > 0
-                );
-              if (inPort === -1) return false;
-              const target = this.graph.nodes[h];
-              const source = this.graph.nodes[i];
-              const currentIncomingNode = this.graph.incomingNode(
-                target,
-                inPort
-              );
-              if (currentIncomingNode) {
-                this.graph.disconnect(currentIncomingNode, target, inPort);
-              }
-              this.graph.connect(source, target, outPort, inPort);
-              this.getConnections();
-              return true;
-            });
-            this.dragConnection = void 0;
-          },
-        });
-      });
-
-      this.dh.register(
-        gl,
-        {
-          setRef: (dg) => dg.path[0],
-          onMove: ({ glue, startOffset, delta }) => {
-            const props = glue.props;
-            props.xOffsetPx = startOffset.x + delta.x;
-            props.yOffsetPx = startOffset.y + delta.y;
-
-            // update pos in source data
-            const nodeIndex = this.glNodes.indexOf(glue);
-            this.positions[nodeIndex] = [
-              (props.xPx + props.xOffsetPx) / designerVars.zoomFactor,
-              (props.yPx + props.yOffsetPx) / designerVars.zoomFactor,
-            ];
-          },
-        },
-        'core'
-      );
-
-      gl.query('in-port').forEach((port, inPort) => {
-        this.mh.register(port, {
-          onClick: () => {
-            const nodes = this.graph.nodes;
-            const incomingNode = this.graph.incomingNode(nodes[i], inPort);
-            if (!incomingNode) return false;
-            this.graph.disconnect(incomingNode, nodes[i], inPort);
-            this.getConnections();
-          },
-        });
-      });
-
-      this.mh.register(gl.query('core')[0], {
-        onClick: () => (this.selectedNode = this.graph.nodes[i]),
-      });
-    });
+    this.newConnectionDragHandler.reload();
+    this.moveNodeDragHandler.reload();
+    this.hoverMouseHandler.reload();
+    this.selectNodeMouseHandler.reload();
+    this.disconnectPortMouseHandler.reload();
 
     const resize = fromEvent(window, 'resize');
 
@@ -294,7 +234,7 @@ export class Designer {
           this.bgCanvas.height = this.canvas.clientHeight;
           this.drawGrid(this.bgCanvas.getContext('2d'), this.bgCanvas);
         }),
-        takeUntil(this.unsub)
+        takeUntil(this.unsub),
       )
       .subscribe();
 
@@ -303,7 +243,7 @@ export class Designer {
         tap(() => {
           this.repaint();
         }),
-        takeUntil(this.unsub)
+        takeUntil(this.unsub),
       )
       .subscribe();
   }
@@ -331,71 +271,11 @@ export class Designer {
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     ctx.translate(designerVars.translate.x, designerVars.translate.y);
 
-    if (this.dragConnection) {
-      glue({
-        xPx: this.dragConnection.from.x,
-        yPx: this.dragConnection.from.y,
-        wPx: this.dragConnection.to.x,
-        hPx: this.dragConnection.to.y,
-        asLine: true,
-        color: colors.connections,
-        customPaint: (gl, ctx) => {
-          const { pos, dim } = gl.cache;
-          const offset = 0;
-          ctx.save();
-          ctx.beginPath();
-          ctx.strokeStyle = colors.dragConnection;
-          ctx.setLineDash([4, 8]);
-          ctx.lineWidth = 2;
-          ctx.moveTo(pos.x + offset, pos.y);
-          const toX = pos.x + dim.x - offset;
-          const toY = pos.y + dim.y;
-          const delta = Math.sqrt(
-            Math.pow(pos.x - toX, 2) + Math.pow(pos.y - toY, 2)
-          );
-          const smoothing = delta * 0.1;
-          ctx.bezierCurveTo(
-            pos.x + smoothing + offset,
-            pos.y,
-            toX - smoothing,
-            toY,
-            toX,
-            toY
-          );
-          ctx.stroke();
-          ctx.closePath();
-          ctx.restore();
-        },
-      }).paint(this.canvas);
-    }
-
-    this.glNodes.forEach((g) => g.paint(this.canvas));
+    this.newConnectionDragHandler.paint(this.canvas);
+    this.glNodes.forEach(g => g.paint(this.canvas));
 
     const lines = connectionsGlue(this) as Glue[];
-    lines.forEach((g) => g.paint(this.canvas));
-  }
-
-  private getConnections(): {
-    source: number;
-    target: number;
-    inPort: number;
-    outPort: number;
-  }[] {
-    const connections: any = [];
-    this.graph.edges.forEach((edges, source) => {
-      edges.forEach((conns, target) => {
-        if (conns === 0) return;
-        conns.forEach(([outPort, inPort]) =>
-          connections.push({
-            source,
-            target,
-            outPort,
-            inPort,
-          })
-        );
-      });
-    });
-    return (this.connections = connections);
+    lines.forEach(g => g.paint(this.canvas));
   }
 
   private drawGrid(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
@@ -416,65 +296,4 @@ export class Designer {
       }
     }
   }
-
-  private addItem(x: number, y: number, node: DesignerNode): Glue {
-    const gridSize = designerVars.adjCellSize() * 2;
-    const height = this.coreHeight(node);
-
-    const gl = glue(
-      {
-        wPx: gridSize * 6,
-        hPx: height,
-        xPx: x,
-        yPx: y,
-        snapToGrid: gridSize,
-        color: 'transparent',
-      },
-      [
-        coreGlue(this, node),
-        inPortsGlue(this, { node }) as Glue,
-        outPortsGlue(this, { node }) as Glue,
-        labelGlue(this, { node }) as Glue,
-        titleGlue(node),
-      ]
-    );
-    return gl;
-  }
-}
-
-declare const FontFace: any;
-
-export function loadIconFont(): Promise<any> {
-  const materialFont = new FontFace('material-icons', 'url(https://fonts.gstatic.com/s/materialicons/v55/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2)');
-  (document as any).fonts.add(materialFont);
-  return materialFont.load();
-}
-
-export function connInputsCount(node: DesignerNode, index: number, graph: ReactiveGraph<DesignerNode>): number {
-  let count = 0;
-  for (let i = 0; i < index; i++) {
-    const conn = graph.incomingNode(node, i);
-    if (!conn) continue;
-    count++;
-  }
-  return count;
-}
-
-export interface MktData {
-  high: number;
-  low: number;
-  bid: number;
-  ask: number;
-}
-
-function pixelRatio() {
-  const ctx = document.createElement('canvas').getContext('2d') as any;
-  const dpr = window.devicePixelRatio || 1;
-  const bsr = ctx.webkitBackingStorePixelRatio ||
-    ctx.mozBackingStorePixelRatio ||
-    ctx.msBackingStorePixelRatio ||
-    ctx.oBackingStorePixelRatio ||
-    ctx.backingStorePixelRatio || 1;
-
-  return dpr / bsr;
 }

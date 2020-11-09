@@ -12,6 +12,7 @@ export const colors = {
     connected: '#e0e0e0',
     disconnected: '#999',
     separator: '#e0e0e0',
+    hoverBg: '#e0e0e0',
   },
   core: {
     bgConnected: '#fff',
