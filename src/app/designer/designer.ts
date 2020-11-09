@@ -84,29 +84,6 @@ export class Designer {
     return (this.connections = connections);
   }
 
-  zoom(factor = 0, mPos: { x: number; y: number } = void 0) {
-    const newZoomFactor = Math.min(
-      Math.max(designerVars.zoomFactor + factor, 0.6),
-      1.4,
-    );
-    const delta = newZoomFactor - designerVars.zoomFactor;
-    designerVars.zoomFactor = newZoomFactor;
-
-    this.adjustedPositions = this.positions.map(([x, y]) => [
-      x * designerVars.zoomFactor,
-      y * designerVars.zoomFactor,
-    ]);
-
-    if (mPos) {
-      const { translate } = designerVars;
-      translate.x = Math.min(translate.x - mPos.x * delta, 0);
-      translate.y = Math.min(translate.y - mPos.y * delta, 0);
-    }
-
-    this.reload();
-    this.drawGrid(this.bgCanvas.getContext('2d'), this.bgCanvas);
-  }
-
   save() {
     localStorage.setItem('graph', this.toJson());
   }
@@ -114,7 +91,7 @@ export class Designer {
   addNode(node: DesignerNode) {
     this.graph.addNode(node);
     this.positions.push([8, 8]);
-    this.zoom(0);
+    this.repaint();
   }
 
   run(initState: any): () => void {
@@ -164,10 +141,8 @@ export class Designer {
     private logger: LoggerService,
   ) {
     this.running = this.runningSub.asObservable();
-    this.zoom(0);
     bgCanvas.style.backgroundColor = colors.bg;
     this.drawGrid(bgCanvas.getContext('2d'), bgCanvas);
-
     this.reload();
   }
 
@@ -179,7 +154,6 @@ export class Designer {
     const index = this.graph.nodes.indexOf(node);
     this.positions = this.positions.filter((pos, i) => i !== index);
     this.graph.removeNode(node);
-    this.zoom(0);
   }
 
   private toJson(): string {
@@ -195,27 +169,11 @@ export class Designer {
 
   private reload() {
     this.reset();
-
-    fromEvent(this.canvas, 'mousewheel')
-      .pipe(
-        filter((ev: WheelEvent) => ev.ctrlKey),
-        tap((ev: WheelEvent) => {
-          const rect = this.canvas.getBoundingClientRect();
-          const mPos = {
-            x: ev.pageX - rect.x,
-            y: ev.pageY - rect.y,
-          };
-          this.zoom(Math.sign(ev.deltaY) * -0.04, mPos);
-        }),
-        takeUntil(this.unsub),
-      )
-      .subscribe();
-
     this.glNodes = this.graph.nodes.map(
       (node, i) =>
         nodeGlue(this, {
-          x: this.adjustedPositions[i][0] + .5,
-          y: this.adjustedPositions[i][1] + .5,
+          x: this.positions[i][0] + .5,
+          y: this.positions[i][1] + .5,
           node,
         }) as Glue,
     );
@@ -293,18 +251,6 @@ export class Designer {
     const h = canvas.height;
     const gridSize = designerVars.adjCellSize();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const translateX = designerVars.translate.x % gridSize;
-    const translateY = designerVars.translate.y % gridSize;
-
-    // for (let y = translateY; y < h; y += gridSize) {
-    //   for (let x = translateX; x < w; x += gridSize) {
-    //     ctx.beginPath();
-    //     ctx.fillStyle = colors.grid;
-    //     ctx.arc(x, y, 1 * designerVars.zoomFactor, 0, Math.PI * 2);
-    //     ctx.fill();
-    //     ctx.closePath();
-    //   }
-    // }
 
     for (let x = gridSize * 12 + .5; x < w; x += gridSize * 12) {
       ctx.beginPath();

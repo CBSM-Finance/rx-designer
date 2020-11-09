@@ -61,14 +61,12 @@ export class MoveNodeDragHandler {
               if (timeDiff >= duration) {
                 positions[nodeIndex] = [toPos.x, toPos.y];
                 this.designer.repaint();
-                this.designer.zoom(0);
                 return;
               }
               const x = timeDiff / duration;
               const newPos = animateTo(startPos, toPos, x);
               positions[nodeIndex] = [newPos.x, newPos.y];
               this.designer.repaint();
-              this.designer.zoom(0);
               window.requestAnimationFrame(() => animate());
             };
             animate();
