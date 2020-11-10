@@ -24,7 +24,7 @@ export const nodeGlue: GlueFactory<NodeGlueFactoryOpts> = (
       hPx: height,
       xPx: x,
       yPx: y,
-      // snapToGrid: { x: void 0, y: gridSize * 2 },
+      snapToGrid: { x: void 0, y: gridSize },
       color: 'transparent',
     },
     [
@@ -32,7 +32,7 @@ export const nodeGlue: GlueFactory<NodeGlueFactoryOpts> = (
       inPortsGlue(designer, { node }) as Glue,
       outPortsGlue(designer, { node }) as Glue,
       labelGlue(designer, { node }) as Glue,
-      titleGlue(node),
+      titleGlue(designer, { node }) as Glue,
     ],
   );
   return gl;

@@ -17,27 +17,37 @@ import { loadIconFont } from './designer/load-icon-font';
 export class AppComponent implements AfterViewInit {
   designer: Designer;
 
+  private loadIconFont = loadIconFont();
+
   constructor(
     private ms: MarblesService,
     private logger: LoggerService,
     private cdRef: ChangeDetectorRef,
-  ) {
-    loadIconFont();
-  }
+  ) { }
 
   ngAfterViewInit() {
-    const canvas = document.querySelectorAll('canvas')[1] as HTMLCanvasElement;
-    const bgCanvas = document.querySelectorAll(
-      'canvas'
-    )[0] as HTMLCanvasElement;
-    canvas.width = bgCanvas.width = canvas.clientWidth;
-    canvas.height = bgCanvas.height = canvas.clientHeight;
-    const graphJson = localStorage.getItem('graph') || (json as any).default;
-    this.designer = Designer.fromJson(graphJson, canvas, bgCanvas, this.ms, this.logger);
-    this.cdRef.detectChanges();
+    this.loadIconFont.then(() => {
+      const canvas = document.querySelectorAll('canvas')[1] as HTMLCanvasElement;
+      const bgCanvas = document.querySelectorAll(
+        'canvas'
+      )[0] as HTMLCanvasElement;
+      const graphJson = localStorage.getItem('graph') || (json as any).default;
+      this.designer = Designer.fromJson(graphJson, canvas, bgCanvas, this.ms, this.logger);
+    });
   }
 
   addNode(node: DesignerNode) {
     this.designer.addNode(node);
+  }
+
+  action(name: string) {
+    switch (name) {
+      case 'reload':
+        this.designer.repaint();
+        break;
+        case 'reload':
+        this.designer.reload();
+        break;
+      }
   }
 }

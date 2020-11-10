@@ -1,13 +1,38 @@
 import { Designer } from '../designer';
 import { designerVars } from '../designer-vars';
 import { coreHeight } from '../core-height';
-import { add, dot, subtract } from '../../glue';
+import { add, dot, Glue, len, subtract } from '../../glue';
 
 export class MoveNodeDragHandler {
   dragPreview: { x: number; y: number; w: number; h: number };
 
   reload() {
     const { dh, glNodes, positions, graph } = this.designer;
+
+    function translateWithDelta(
+      glue: Glue,
+      startOffset: { x: number; y: number },
+      delta: { x: number; y: number },
+    ) {
+      const props = glue.props;
+      props.xOffsetPx = startOffset.x + delta.x;
+      props.yOffsetPx = startOffset.y + delta.y;
+      const nodeIndex = glNodes.indexOf(glue);
+      positions[nodeIndex] = [
+        props.xPx + props.xOffsetPx,
+        props.yPx + props.yOffsetPx,
+      ];
+    }
+
+    function translateAbsolute(glue: Glue, pos: { x: number; y: number }) {
+      const nodeIndex = glNodes.indexOf(glue);
+      positions[nodeIndex] = [pos.x, pos.y];
+      const props = glue.props;
+      props.xPx = pos.x;
+      props.yPx = pos.y;
+      props.xOffsetPx = 0;
+      props.yOffsetPx = 0;
+    }
 
     glNodes.forEach((gl, i) => {
       dh.register(
@@ -17,23 +42,15 @@ export class MoveNodeDragHandler {
           onMove: ({ glue, startOffset, delta, mPos }) => {
             this.designer.toggleGrid(true);
 
-            const props = glue.props;
-            props.xOffsetPx = startOffset.x + delta.x;
-            props.yOffsetPx = startOffset.y + delta.y;
+            translateWithDelta(gl, startOffset, delta);
 
             const cellSize = designerVars.adjCellSize();
             const grid = {
               x: cellSize * 14,
-              y: cellSize * 2,
+              y: cellSize,
             };
 
-            // update pos in source data
             const nodeIndex = glNodes.indexOf(glue);
-            positions[nodeIndex] = [
-              (props.xPx + props.xOffsetPx) / designerVars.zoomFactor,
-              (props.yPx + props.yOffsetPx) / designerVars.zoomFactor,
-            ];
-
             const node = graph.nodes[i];
             this.dragPreview = {
               x: ~~(mPos.x / grid.x) * grid.x,
@@ -43,6 +60,7 @@ export class MoveNodeDragHandler {
             };
           },
           onDrop: () => {
+            if (!this.dragPreview) return;
             const nodeIndex = glNodes.indexOf(gl);
             const startPos = {
               x: positions[nodeIndex][0],
@@ -54,28 +72,31 @@ export class MoveNodeDragHandler {
 
             this.designer.toggleGrid(false);
 
+            // don't animate if movement was too little
+            const deltaForAnim = 8;
+            const dist = len(subtract(toPos, startPos));
+            if (dist <= deltaForAnim) {
+              translateAbsolute(gl, toPos);
+              this.designer.repaint();
+              return;
+            }
+
             const animStartTime = new Date().getTime();
             const animate = () => {
               const time = new Date().getTime();
               const timeDiff = time - animStartTime;
               if (timeDiff >= duration) {
-                positions[nodeIndex] = [toPos.x, toPos.y];
+                translateAbsolute(gl, toPos);
                 this.designer.repaint();
                 return;
               }
               const x = timeDiff / duration;
               const newPos = animateTo(startPos, toPos, x);
-              positions[nodeIndex] = [newPos.x, newPos.y];
+              translateAbsolute(gl, newPos);
               this.designer.repaint();
               window.requestAnimationFrame(() => animate());
             };
             animate();
-
-            // update pos in source data
-            // positions[nodeIndex] = [
-            //   (props.xPx + props.xOffsetPx) / designerVars.zoomFactor,
-            //   (props.yPx + props.yOffsetPx) / designerVars.zoomFactor,
-            // ];
           },
         },
         'core',
@@ -97,15 +118,6 @@ function animateTo(
   return add(from, delta);
 }
 
-function easeInOutBack(x: number): number {
-  const c1 = 1.70158;
-  const c2 = c1 * 1.525;
-
-  return x < 0.5
-    ? (Math.pow(2 * x, 2) * ((c2 + 1) * 2 * x - c2)) / 2
-    : (Math.pow(2 * x - 2, 2) * ((c2 + 1) * (x * 2 - 2) + c2) + 2) / 2;
-}
-
 function easeOutElastic(x: number): number {
   const c4 = (2 * Math.PI) / 3;
   return x === 0
@@ -113,4 +125,4 @@ function easeOutElastic(x: number): number {
     : x === 1
     ? 1
     : Math.pow(2, -10 * x) * Math.sin((x * 10 - 0.75) * c4) + 1;
-  }
+}

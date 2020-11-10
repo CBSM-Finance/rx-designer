@@ -15,6 +15,10 @@
       <app-node-details *ngIf="designer && designer.selectedNode" [designer]="designer" [node]="designer?.selectedNode"></app-node-details>
     </div>
   </div>
+  <div class="bar">
+    <button (click)="action('reload')">reload</button>
+    <button (click)="action('repaint')">repaint</button>
+  </div>
   <div fxLayout="row">
     <app-marbles></app-marbles>
     <app-logs></app-logs>

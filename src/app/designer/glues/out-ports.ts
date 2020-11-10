@@ -94,17 +94,6 @@ export const outPortGlue: GlueFactory<OutPortFactoryOpts> = ({ graph }, { y, i, 
         ctx.fillStyle = 'rgba(0, 0, 0, .2)';
         ctx.fill();
       }
-
-      // arrow
-      // paintArrow(ctx, {
-      //   x: pos.x + cellSize / 2,
-      //   y: pos.y + cellSize / 2,
-      // }, {
-      //   x: cellSize,
-      //   y: cellSize,
-      // });
-      // ctx.strokeStyle = colors.ports.connected;
-      // ctx.stroke();
     },
   });
 };

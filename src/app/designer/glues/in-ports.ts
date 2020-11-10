@@ -5,6 +5,7 @@ import { roundedRect } from '../paint/rounded-rect';
 import { GlueFactory } from './glue-factory';
 import { colors, design } from '../colors';
 import { paintX } from '../paint/x';
+import { vertCenteredText } from '../paint/vert-centered-text';
 
 type InPortsFactoryOpts = { node: DesignerNode };
 
@@ -63,10 +64,17 @@ export const inPortGlue: GlueFactory<InPortFactoryOpts> = (
         ctx.fillStyle = connected
           ? colors.connections
           : colors.ports.disconnected;
-        ctx.textBaseline = 'middle';
+
         ctx.textAlign = 'left';
-        ctx.font = `400 ${8 * designerVars.zoomFactor}pt Roboto`;
-        ctx.fillText(input.name, pos.x + cellSize * 2, pos.y + cellSize);
+        vertCenteredText(
+          input.name,
+          pos.x + cellSize * 2,
+          pos.y,
+          10.5,
+          ctx,
+        );
+
+        // ctx.fillText(input.name, , pos.y + textY);
         ctx.closePath();
 
         // outer rect
@@ -114,7 +122,7 @@ export const inPortSymbolGlue: GlueFactory<InPortSymbolFactoryOpts> = (
       const connected = graph.incomingNode(node, i);
 
       // inner "x"
-      if (hover && connected) {
+      if (hover && connected && !newConnectionDragHandler.dragging) {
         ctx.beginPath();
         paintX(
           ctx,

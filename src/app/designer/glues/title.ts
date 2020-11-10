@@ -3,8 +3,11 @@ import { DesignerNode } from 'src/app/nodes/designer-node';
 import { getGroup } from 'src/app/nodes/node-groups';
 import { colors } from '../colors';
 import { designerVars } from '../designer-vars';
+import { GlueFactory } from './glue-factory';
 
-export function titleGlue(node: DesignerNode) {
+type TitleGlueFactoryOpts = { node: DesignerNode };
+
+export const titleGlue: GlueFactory<TitleGlueFactoryOpts> = (designer, { node }) => {
   const group = getGroup(node);
   const cellSize = designerVars.adjCellSize();
 
@@ -13,6 +16,7 @@ export function titleGlue(node: DesignerNode) {
     yPx: -cellSize * 2,
     wPc: 1,
     hPx: cellSize * 2,
+    // color: 'red',
     customPaint: (gl, ctx) => {
       const { pos } = gl.cache;
       ctx.beginPath();

@@ -10,6 +10,7 @@ export interface DragConnection {
 
 export class NewConnectionDragHandler {
   docking = false;
+  dragging = false;
 
   private dragConnection = void 0;
 
@@ -59,6 +60,7 @@ export class NewConnectionDragHandler {
         dh.register(port, {
           setRef: dg => dg.path[0],
           onMove: ({ glue, delta }) => {
+            this.dragging = true;
             const center = glue.center();
             const inPort = this.hoveredInPort(nodeGlue, add(center, delta));
             this.docking = Boolean(inPort);
@@ -69,6 +71,7 @@ export class NewConnectionDragHandler {
           },
           onDrop: ({ event }) => {
             this.docking = false;
+            this.dragging = false;
             glNodes.find((g, h) => {
               if (g === nodeGlue) return false;
               const rect = canvas.getBoundingClientRect();

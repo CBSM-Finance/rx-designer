@@ -155,6 +155,7 @@ function paint(gl: Glue, canvas: HTMLCanvasElement, parent?: Glue): void {
 }
 
 function intersect(gl: Glue, x: number, y: number): any[] {
+  if (!gl.cache.pos) return [];
   if (anyNegatives(subtract({ x, y }, gl.cache.pos))) return [];
   if (anyNegatives(subtract(add(gl.cache.pos, gl.cache.dim), { x, y })))
     return [];
@@ -351,9 +352,27 @@ export class DragHandler {
     merge(fromEvent(canvas, 'mouseup'), fromEvent(canvas, 'mouseout'))
       .pipe(
         filter(() => Boolean(this.dragger)),
-        tap((ev: MouseEvent) => {
+        map((ev: any) => {
+          const rect = canvas.getBoundingClientRect();
+          const { translate } = designerVars;
+          return [
+            ev,
+            {
+              x: ev.pageX - rect.x - translate.x,
+              y: ev.pageY - rect.y - translate.y,
+            }
+          ];
+        }),
+        tap(([ev, mPos]) => {
+          const delta = subtract(mPos, this.dragMouseStartPos);
+          const { startOffset } = this;
           const onDrop = this.dragger.conf.callbacks.onDrop;
-          if (onDrop) onDrop({ event: ev });
+          if (onDrop) onDrop({
+            event: ev,
+            startOffset,
+            delta,
+            mPos,
+          });
           this.dragger = void 0;
         }),
         takeUntil(this.unsub),
@@ -404,7 +423,12 @@ export interface DragConf {
   glue: Glue;
 }
 
-export type DragDropCallback = (args: { event: MouseEvent }) => any;
+export type DragDropCallback = (args: {
+  event: MouseEvent;
+  startOffset: { x: number; y: number };
+  delta: { x: number; y: number };
+  mPos: { x: number; y: number };
+}) => any;
 
 export type DragMoveCallback = (args: {
   glue: Glue;

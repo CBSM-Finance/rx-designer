@@ -1,6 +1,13 @@
 import { ReactiveGraph } from '@cbsm-finance/reactive-nodes';
 import { merge, of, Subject, Observable, Subscriber } from 'rxjs';
-import { tap, takeUntil, filter, finalize } from 'rxjs/operators';
+import {
+  tap,
+  takeUntil,
+  filter,
+  finalize,
+  timeout,
+  delay,
+} from 'rxjs/operators';
 import { DragHandler, Glue, glue, MouseEventHandler } from '../glue';
 import { objToNode, nodeToObj } from './obj-to-node';
 import { DesignerNode } from '../nodes/designer-node';
@@ -91,7 +98,7 @@ export class Designer {
   addNode(node: DesignerNode) {
     this.graph.addNode(node);
     this.positions.push([8, 8]);
-    this.repaint();
+    this.reload();
   }
 
   run(initState: any): () => void {
@@ -136,24 +143,23 @@ export class Designer {
     public graph: ReactiveGraph<DesignerNode>,
     public positions: number[][],
     public canvas: HTMLCanvasElement,
-    private bgCanvas: HTMLCanvasElement,
+    public bgCanvas: HTMLCanvasElement,
     private ms: MarblesService,
     private logger: LoggerService,
   ) {
     this.running = this.runningSub.asObservable();
     bgCanvas.style.backgroundColor = colors.bg;
-    this.drawGrid(bgCanvas.getContext('2d'), bgCanvas);
     this.reload();
   }
 
   public removeNode(node: DesignerNode): void {
-    alert('remove node');
     if (this.selectedNode === node) {
       this.selectedNode = void 0;
     }
     const index = this.graph.nodes.indexOf(node);
     this.positions = this.positions.filter((pos, i) => i !== index);
     this.graph.removeNode(node);
+    this.reload();
   }
 
   private toJson(): string {
@@ -167,16 +173,19 @@ export class Designer {
     return JSON.stringify(obj);
   }
 
-  private reload() {
+  private glNode(node: DesignerNode, i: number): Glue {
+    return nodeGlue(this, {
+      x: this.positions[i][0] + 0.5,
+      y: this.positions[i][1] + 0.5,
+      node,
+    }) as Glue;
+  }
+
+  reload() {
     this.reset();
-    this.glNodes = this.graph.nodes.map(
-      (node, i) =>
-        nodeGlue(this, {
-          x: this.positions[i][0] + .5,
-          y: this.positions[i][1] + .5,
-          node,
-        }) as Glue,
-    );
+    console.log('reload');
+
+    this.glNodes = this.graph.nodes.map((node, i) => this.glNode(node, i));
     this.getConnections();
 
     this.newConnectionDragHandler.reload();
@@ -187,18 +196,24 @@ export class Designer {
 
     const resize = fromEvent(window, 'resize');
 
-    resize
+    merge(of(void 0).pipe(delay(0)), resize)
       .pipe(
         tap(() => {
-          this.bgCanvas.width = this.canvas.clientWidth;
-          this.bgCanvas.height = this.canvas.clientHeight;
+          const ratio = pixelRatio();
+          this.bgCanvas.width = this.canvas.clientWidth * ratio;
+          this.bgCanvas.height = this.canvas.clientHeight * ratio;
           this.drawGrid(this.bgCanvas.getContext('2d'), this.bgCanvas);
         }),
         takeUntil(this.unsub),
       )
       .subscribe();
 
-    merge(of(void 0), this.dh.markForRepaint, this.mh.markForRepaint, resize)
+    merge(
+      of(void 0).pipe(delay(0)),
+      this.dh.markForRepaint,
+      this.mh.markForRepaint,
+      resize,
+    )
       .pipe(
         tap(() => {
           this.repaint();
@@ -218,18 +233,15 @@ export class Designer {
   private resizeCanvas(ctx: CanvasRenderingContext2D): void {
     const ratio = pixelRatio();
     const { canvas } = this;
-    canvas.width = canvas.clientWidth * ratio;
-    canvas.height = canvas.clientHeight * ratio;
+    canvas.width = this.canvas.clientWidth * ratio;
+    canvas.height = this.canvas.clientHeight * ratio;
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
   }
 
   repaint() {
     const ctx = this.canvas.getContext('2d');
-
     this.resizeCanvas(ctx);
-
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    ctx.translate(designerVars.translate.x, designerVars.translate.y);
 
     // if (this.moveNodeDragHandler.dragPreview) {
     //   const prev = this.moveNodeDragHandler.dragPreview;
@@ -252,9 +264,9 @@ export class Designer {
     const gridSize = designerVars.adjCellSize();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    for (let x = gridSize * 12 + .5; x < w; x += gridSize * 12) {
+    for (let x = gridSize * 12 + 0.5; x < w; x += gridSize * 12) {
       ctx.beginPath();
-      ctx.lineWidth = .5;
+      ctx.lineWidth = 0.5;
       ctx.strokeStyle = colors.grid;
       ctx.moveTo(x, 0);
       ctx.lineTo(x, h);
@@ -263,7 +275,7 @@ export class Designer {
 
       x += gridSize * 2;
       ctx.beginPath();
-      ctx.lineWidth = .5;
+      ctx.lineWidth = 0.5;
       ctx.strokeStyle = colors.grid;
       ctx.moveTo(x, 0);
       ctx.lineTo(x, h);
@@ -271,9 +283,9 @@ export class Designer {
       ctx.stroke();
     }
 
-    for (let y = .5; y < h; y += gridSize) {
+    for (let y = 0.5; y < h; y += gridSize) {
       ctx.beginPath();
-      ctx.lineWidth = .5;
+      ctx.lineWidth = 0.5;
       ctx.strokeStyle = colors.grid;
       ctx.moveTo(0, y);
       ctx.lineTo(w, y);
